@@ -8,6 +8,12 @@ import (
 )
 
 func main() {
+
+
+	// start := time.Now().UnixNano()
+	// end := time.Now().UnixNano()
+	// fmt.Printf("cost is :%d \n", ( end-start)/1000)
+
 	app := iris.New()
 	app.Logger().SetLevel("debug")
 	// Optionally, add two built'n handlers
