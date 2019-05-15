@@ -5,11 +5,12 @@ import (
 	"github.com/kataras/iris"
 	"github.com/kataras/iris/middleware/logger"
 	"github.com/kataras/iris/middleware/recover"
+	"./library"
 )
 
 func main() {
 
-
+	test.Test()
 	// start := time.Now().UnixNano()
 	// end := time.Now().UnixNano()
 	// fmt.Printf("cost is :%d \n", ( end-start)/1000)
