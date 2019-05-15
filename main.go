@@ -11,6 +11,8 @@ import (
 func main() {
 
 	test.Test()
+
+
 	// start := time.Now().UnixNano()
 	// end := time.Now().UnixNano()
 	// fmt.Printf("cost is :%d \n", ( end-start)/1000)
@@ -46,4 +48,5 @@ func main() {
 	// http://localhost:8080/ping
 	// http://localhost:8080/hello
 	app.Run(iris.Addr(":8080"), iris.WithoutServerError(iris.ErrServerClosed))
+
 }
