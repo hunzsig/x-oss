@@ -3,9 +3,23 @@ package database
 import (
 	"database/sql"
 	"fmt"
+	_ "github.com/go-sql-driver/mysql"
 )
 
-func dsn(conf map[string]string){
-	dbDsn := fmt.Sprintf("port=32768 user=%s password=%s dbname=%s sslmode=disable", "postgres", "pass123", "postgres")
+func dsn(conf map[string]string) string {
+	dsnString := ""
+	switch conf["type"] {
+	case "mysql":
+		dsnString = fmt.Sprintf(
+			"%s:%s@tcp(%s:%s)/%s?parseTime=true",
+			conf["account"], conf["password"], conf["host"], conf["port"], conf["name"])
+	case "pysql":
+		dsnString = fmt.Sprintf("port=$s user=%s password=%s dbname=%s sslmode=disable", "postgres", "123456", "postgres")
+	}
+	return dsnString
+}
+
+func connect(conf map[string]string) {
+	dbDsn := dsn(conf)
 	db, err := sql.Open(conf["type"], dbDsn)
 }
