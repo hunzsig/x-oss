@@ -1,6 +1,7 @@
 package main
 
 import (
+	"./config"
 	"./response"
 	"./system"
 	"github.com/kataras/iris"
@@ -19,6 +20,8 @@ func main() {
 	app.Use(recover.New())
 	app.Use(logger.New())
 
+	system.Hfill()
+	config.Init()
 	route(app)
 
 	app.Run(iris.Addr(":8080"), iris.WithoutServerError(iris.ErrServerClosed))

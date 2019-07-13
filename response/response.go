@@ -53,3 +53,8 @@ func Abort(ctx iris.Context, msg string, data interface{}) bool {
 	response(ctx, CodeAbort, msg, data)
 	return false
 }
+
+func Download(ctx iris.Context, filename string) bool {
+	ctx.SendFile(filename, "helloworld.log")
+	return true
+}

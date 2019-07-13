@@ -15,3 +15,10 @@ func Set(key string, val string) {
 func Get(key string) string {
 	return stack[key]
 }
+
+/**
+ * 初始化
+ */
+func Init()  {
+	Database("default")
+}
