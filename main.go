@@ -20,7 +20,7 @@ func main() {
 	app.Use(recover.New())
 	app.Use(logger.New())
 
-	system.Hfill()
+	// system.fill()
 	config.Init()
 	route(app)
 
