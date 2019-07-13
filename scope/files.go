@@ -7,10 +7,9 @@ import (
 	"os"
 )
 
-func Homepage(ctx iris.Context) bool {
-	return response.Success(ctx, "Welcome golang", nil)
-}
-
+/**
+ * 上传文件
+ */
 func Upload(ctx iris.Context) bool {
 	// Get the file from the request.
 	file, header, err := ctx.FormFile("file")
@@ -29,4 +28,12 @@ func Upload(ctx iris.Context) bool {
 	defer out.Close()
 	io.Copy(out, file)
 	return response.Success(ctx, "Upload over"+string(fileSize), nil)
+}
+
+/**
+ * 根据token下载文件
+ */
+func Download(ctx iris.Context) bool {
+	token := ctx.Params().Get("token")
+	return response.Success(ctx, token, nil)
 }

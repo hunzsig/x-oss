@@ -4,17 +4,8 @@ import (
 	"github.com/kataras/iris"
 )
 
-const CodeSuccess = 200
-const CodeBroadcast = 201
-const CodeGoon = 202
-const CodeInfo = 300
-const CodeException = 400
-const CodeError = 401
-const CodeNotPermission = 403
-const CodeNotFound = 404
-const CodeAbort = 405
-
 func response(ctx iris.Context, code int16, msg string, data interface{}) {
+	ctx.Gzip(true)
 	ctx.JSON(iris.Map{"code": code, "msg": msg, "data": data})
 }
 
