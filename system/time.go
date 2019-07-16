@@ -1,19 +1,15 @@
 package system
 
 import (
-	"time"
+	"../php2go"
 )
 
 var systemStart int64
 
-func MicroTime() int64 {
-	return time.Now().UnixNano()
-}
-
 func Start() {
-	systemStart = MicroTime()
+	systemStart = php2go.Microtime()
 }
 
 func End() int64 {
-	return (MicroTime() - systemStart) / 1000
+	return (php2go.Microtime() - systemStart) / 1000
 }

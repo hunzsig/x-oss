@@ -9,9 +9,13 @@ type envReflect struct {
 	Hosts   []string `default:"127.0.0.1"`
 	Timeout time.Duration
 
-	RedisHost string `default:"127.0.0.1"`
-	RedisPort int    `default:"6379"`
+	RedisHost     string `default:"127.0.0.1"`
+	RedisPort     string `default:"6379"`
+	RedisPassword string `default:""`
 
-	MysqlHost string `default:"127.0.0.1"`
-	MysqlPort int    `default:"3306"`
+	MysqlHost     string `default:"127.0.0.1"`
+	MysqlPort     string `default:"3306"`
+	MysqlAccount  string `default:"root"`
+	MysqlPassword string `default:"123456"`
+	MysqlName     string `default:"hunzsig"`
 }
