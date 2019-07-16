@@ -21,7 +21,9 @@ func main() {
 
 	route(app)
 
-	app.Run(iris.Addr(":8080"), iris.WithoutServerError(iris.ErrServerClosed))
+	system.Dump(system.Env)
+
+	app.Run(iris.Addr(":"+system.Env.Port), iris.WithoutServerError(iris.ErrServerClosed))
 
 }
 

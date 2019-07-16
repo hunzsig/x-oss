@@ -4,9 +4,9 @@ import "time"
 
 type envReflect struct {
 	App     string
-	Port    int      `default:"8080"`
+	Port    string   `default:"8080"`
 	Debug   bool     `default:"0"`
-	Hosts   []string `slice_sep:","`
+	Hosts   []string `default:"127.0.0.1"`
 	Timeout time.Duration
 
 	RedisHost string `default:"127.0.0.1"`

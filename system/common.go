@@ -18,19 +18,3 @@ func CurrentPath() string {
 	return path
 }
 
-func GetFileContent(path string) (string, error) {
-	file, err := os.Open(path)
-	if err != nil {
-		return "", err
-	}
-	defer func() {
-		file.Close()
-	}()
-	b := make([]byte, 4096)
-	n, err := file.Read(b)
-	if err != nil {
-		return "", err
-	}
-	data := string(b[:n])
-	return data, nil
-}

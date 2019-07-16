@@ -2,7 +2,7 @@ package system
 
 import (
 	"fmt"
-	"os"
+	"github.com/syyongx/php2go"
 	"reflect"
 	"strconv"
 	"strings"
@@ -10,38 +10,42 @@ import (
 )
 
 var (
-	defaultSep = "_"
-	envRef     *envReflect
+	envRawData map[string]string
+	Env        *envReflect
 )
 
+/**
+ * 初始化
+ */
 func init() {
-	if envRef == nil {
+	envRawData = make(map[string]string)
+	if Env == nil {
 		// load .env file
-		content, err := GetFileContent(CurrentPath() + "/.env")
+		content, err := php2go.FileGetContents(CurrentPath() + "/.env")
 		if err != nil {
 			panic(err)
 		}
-		spilt := strings.Split(content, "\r\n")
-		for _, envItem := range spilt {
+		split := php2go.Explode("\r\n", content)
+		for _, envItem := range split {
 			if len(envItem) > 0 {
 				itemSpilt := strings.Split(envItem, "=")
-				err := os.Setenv("ENVREFLECT_"+itemSpilt[0], itemSpilt[1])
-				if err != nil {
-					panic(err)
+				itemKey := itemSpilt[0]
+				itemKeyArr := strings.Split(itemKey, "_")
+				for k, v := range itemKeyArr {
+					itemKeyArr[k] = php2go.Ucfirst(strings.ToLower(v))
 				}
+				itemKey = php2go.Implode("", itemKeyArr)
+				envRawData[itemKey] = itemSpilt[1]
 			}
 		}
-		// get env
-		envRef = new(envReflect)
-		err = build(envRef)
+		// Dump(envRawData)
+		// set env reflect
+		Env = new(envReflect)
+		err = build(Env)
 		if err != nil {
 			panic(err)
 		}
 	}
-}
-
-func upper(v string) string {
-	return strings.ToUpper(v)
 }
 
 func parseBool(v string) (bool, error) {
@@ -53,21 +57,10 @@ func parseBool(v string) (bool, error) {
 
 func parse(key string, f reflect.Value, sf reflect.StructField) error {
 	df := sf.Tag.Get("default")
-	isRequire, err := parseBool(sf.Tag.Get("require"))
-	if err != nil {
-		return fmt.Errorf("the value of %s is not a valid `member` of bool ，only "+
-			"[1 0 t f T F true false TRUE FALSE True False] are supported", key)
-	}
-	ev, exist := os.LookupEnv(key)
-	Dump(key)
-	Dump(ev)
-	if !exist && isRequire {
-		return fmt.Errorf("%s is required, but has not been set", key)
-	}
-	if !exist && df != "" {
+	ev := envRawData[key]
+	if ev == "" && df != "" {
 		ev = df
 	}
-	// log.Print("ev:", ev)
 	switch f.Kind() {
 	case reflect.String:
 		f.SetString(ev)
@@ -122,12 +115,7 @@ func parse(key string, f reflect.Value, sf reflect.StructField) error {
 		}
 		f.SetBool(b)
 	case reflect.Slice:
-		sep := ";"
-		s, exist := sf.Tag.Lookup("slice_sep")
-		if exist && s != "" {
-			sep = s
-		}
-		vals := strings.Split(ev, sep)
+		vals := strings.Split(ev, ",")
 		switch f.Type() {
 		case reflect.TypeOf([]string{}):
 			f.Set(reflect.ValueOf(vals))
@@ -199,27 +187,11 @@ func parse(key string, f reflect.Value, sf reflect.StructField) error {
 	return nil
 }
 
-func combine(p, n string, sep string, ok bool) string {
-	if p == "" {
-		return n
-	}
-	if !ok {
-		return p + defaultSep + n
-	}
-	return p + sep + n
-}
-
-func fill(pf string, ind reflect.Value) error {
+func fill(ind reflect.Value) error {
 	for i := 0; i < ind.NumField(); i++ {
 		f := ind.Type().Field(i)
-		name := f.Name
-		envName, exist := f.Tag.Lookup("env")
-		if exist {
-			name = envName
-		}
-		s, exist := f.Tag.Lookup("sep")
-		p := combine(pf, upper(name), s, exist)
-		err := parse(p, ind.Field(i), f)
+		key := f.Name
+		err := parse(key, ind.Field(i), f)
 		if err != nil {
 			return err
 		}
@@ -233,17 +205,9 @@ func build(v interface{}) error {
 		return fmt.Errorf("only the pointer to a struct is supported")
 	}
 	// get env data's key name
-	dataKey := upper(ind.Type().Name())
-	err := fill(dataKey, ind)
+	err := fill(ind)
 	if err != nil {
 		return err
 	}
 	return nil
-}
-
-/**
- * 获取环境数据
- */
-func EnvFetch() *envReflect {
-	return envRef
 }

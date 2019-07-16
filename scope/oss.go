@@ -3,7 +3,6 @@ package scope
 import (
 	"../database"
 	"../response"
-	"../system"
 	"github.com/kataras/iris"
 	"io"
 	"os"
@@ -36,7 +35,6 @@ func Upload(ctx iris.Context) bool {
  * 根据token下载文件
  */
 func Download(ctx iris.Context) bool {
-	system.Dump(system.EnvFetch())
 	database.Connect("mysql-local")
 	// token := ctx.Params().Get("token")
 	return response.Download(ctx, "./uploads/test.txt")
