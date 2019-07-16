@@ -6,7 +6,6 @@
 ```
 go get -u github.com/kataras/iris
 go get -u github.com/favframework/debug
-go get github.com/syyongx/php2go
 ```
 
 > 构建/执行项目

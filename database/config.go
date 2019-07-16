@@ -1,10 +1,7 @@
 package database
 
-import (
-	"../config"
-)
 
-func conf(key string) map[string]string {
+func def(key string) map[string]string {
 	conf := make(map[string]string)
 	conf["type"] = config.Get(key + ".type")
 	conf["host"] = config.Get(key + ".host")

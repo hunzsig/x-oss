@@ -1,8 +1,8 @@
 package system
 
 import (
+	"../php2go"
 	"fmt"
-	"github.com/syyongx/php2go"
 	"reflect"
 	"strconv"
 	"strings"
