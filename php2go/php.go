@@ -44,9 +44,7 @@ func Split(str string, step int) []string {
 	sa := make([]string, pl)
 	temp := ""
 	for i := 0; i < sl; i++ {
-		temp = temp + str[:i+1]
-		Dump(i)
-		Dump(temp)
+		temp = temp + string(str[i])
 		if (i+1)%step == 0 || i == sl-1 {
 			sa = append(sa, temp)
 			temp = ""
