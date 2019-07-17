@@ -38,7 +38,7 @@ func Download(ctx iris.Context) bool {
 	if err != nil {
 		return response.Error(ctx, err.Error(), nil)
 	}
-	php2go.VarDump(result)
+	php2go.Dump(result)
 	// token := ctx.Params().Get("token")
 	return response.Download(ctx, "./uploads/test.txt")
 }

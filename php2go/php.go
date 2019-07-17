@@ -1345,15 +1345,6 @@ func IsNan(val float64) bool {
 
 //////////// Directory/Filesystem Functions ////////////
 
-// current dir
-func __DIR__() string {
-	path, err := filepath.Abs(filepath.Dir(os.Args[0]))
-	if err != nil {
-		panic(err)
-	}
-	return path
-}
-
 // Stat stat()
 func Stat(filename string) (os.FileInfo, error) {
 	return os.Stat(filename)

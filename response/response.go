@@ -5,6 +5,7 @@ import (
 )
 
 func Html(ctx iris.Context, htmlcontent string) bool {
+	ctx.Gzip(true)
 	ctx.HTML(htmlcontent)
 	return true
 }

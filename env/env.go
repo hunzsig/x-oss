@@ -21,7 +21,7 @@ func init() {
 	envRawData = make(map[string]string)
 	if Data == nil {
 		// load .env file
-		content, err := php2go.FileGetContents("./.env")
+		content, err := php2go.FileGetContents("env/.env")
 		if err != nil {
 			panic(err)
 		}

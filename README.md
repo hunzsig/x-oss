@@ -14,7 +14,7 @@ windos
 # go build
 # h-assets.exe
 
-linux
+unix
 # go build
 # ./h-assets
 ```
