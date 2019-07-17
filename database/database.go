@@ -1,7 +1,7 @@
 package database
 
 import (
-	"../system"
+	"../php2go"
 	"database/sql"
 	_ "github.com/go-sql-driver/mysql"
 )
@@ -13,7 +13,7 @@ func Connect(name string) *sql.DB {
 	if err != nil {
 		panic(err)
 	}
-	system.Dump(db)
+	php2go.Dump(db)
 	return db
 }
 

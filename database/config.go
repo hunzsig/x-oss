@@ -1,7 +1,7 @@
 package database
 
 import (
-	"../system"
+	"../env"
 )
 
 var (
@@ -22,17 +22,17 @@ func init() {
 	// mysql
 	mysql := make(map[string]string)
 	mysql["type"] = "mysql"
-	mysql["host"] = system.Env.MysqlHost
-	mysql["port"] = system.Env.MysqlPort
-	mysql["account"] = system.Env.MysqlAccount
-	mysql["password"] = system.Env.MysqlPassword
-	mysql["name"] = system.Env.MysqlName
+	mysql["host"] = env.Data.MysqlHost
+	mysql["port"] = env.Data.MysqlPort
+	mysql["account"] = env.Data.MysqlAccount
+	mysql["password"] = env.Data.MysqlPassword
+	mysql["name"] = env.Data.MysqlName
 	set("mysql", mysql)
 	// redis
 	redis := make(map[string]string)
 	redis["type"] = "redis"
-	redis["host"] = system.Env.RedisHost
-	redis["port"] = system.Env.RedisPort
-	redis["password"] = system.Env.RedisPassword
+	redis["host"] = env.Data.RedisHost
+	redis["port"] = env.Data.RedisPort
+	redis["password"] = env.Data.RedisPassword
 	set("redis", redis)
 }

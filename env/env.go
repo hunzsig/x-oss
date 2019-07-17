@@ -1,4 +1,4 @@
-package system
+package env
 
 import (
 	"../php2go"
@@ -11,7 +11,7 @@ import (
 
 var (
 	envRawData map[string]string
-	Env        *envReflect
+	Data       *envReflect
 )
 
 /**
@@ -19,9 +19,9 @@ var (
  */
 func init() {
 	envRawData = make(map[string]string)
-	if Env == nil {
+	if Data == nil {
 		// load .env file
-		content, err := php2go.FileGetContents(CurrentPath() + "/.env")
+		content, err := php2go.FileGetContents("./.env")
 		if err != nil {
 			panic(err)
 		}
@@ -39,9 +39,8 @@ func init() {
 			}
 		}
 		// Dump(envRawData)
-		// set env reflect
-		Env = new(envReflect)
-		err = build(Env)
+		Data = new(envReflect)
+		err = build(Data)
 		if err != nil {
 			panic(err)
 		}

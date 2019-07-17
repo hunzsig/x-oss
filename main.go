@@ -1,16 +1,14 @@
 package main
 
 import (
+	"./env"
 	"./response"
-	"./system"
 	"github.com/kataras/iris"
 	"github.com/kataras/iris/middleware/logger"
 	"github.com/kataras/iris/middleware/recover"
 )
 
 func main() {
-
-	system.Start()
 
 	app := iris.New()
 	app.Logger().SetLevel("debug")
@@ -21,9 +19,7 @@ func main() {
 
 	route(app)
 
-	system.Dump(system.Env)
-
-	app.Run(iris.Addr(":"+system.Env.Port), iris.WithoutServerError(iris.ErrServerClosed))
+	app.Run(iris.Addr(":"+env.Data.Port), iris.WithoutServerError(iris.ErrServerClosed))
 
 }
 

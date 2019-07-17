@@ -2,8 +2,8 @@ package scope
 
 import (
 	"../database"
+	"../php2go"
 	"../response"
-	"../system"
 	"github.com/kataras/iris"
 	"io"
 	"os"
@@ -38,7 +38,7 @@ func Download(ctx iris.Context) bool {
 	if err != nil {
 		return response.Error(ctx, err.Error(), nil)
 	}
-	system.Dump(result)
+	php2go.VarDump(result)
 	// token := ctx.Params().Get("token")
 	return response.Download(ctx, "./uploads/test.txt")
 }
