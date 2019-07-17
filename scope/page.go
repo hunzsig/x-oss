@@ -10,31 +10,23 @@ import (
 var (
 	pageError error
 	tplError  = `<div>{{error}}</div>`
-	tpl404    = `<div>{{error}}</div>`
 )
 
-func page(ctx iris.Context, page string) bool {
+func page(ctx iris.Context, page string, params map[string]string) bool {
 	htmlBuilder := new(html.HtmlBuilder)
-	switch page {
-	case "home":
-		htmlBuilder.Template, pageError = php2go.FileGetContents("html/home.html")
-		htmlBuilder.Params = make(map[string]string)
-		htmlBuilder.Params["title"] = "h-assets"
-		htmlBuilder.Params["tips"] = "Welcome!~h-assets"
-	default:
-		htmlBuilder.Template = tpl404
-		htmlBuilder.Params = make(map[string]string)
-		htmlBuilder.Params["error"] = "page #" + page + " not found"
-	}
+	htmlBuilder.Template, pageError = php2go.FileGetContents("html/" + page + ".html")
+	htmlBuilder.Params = params
 	if pageError != nil {
 		htmlBuilder.Template = tplError
 		htmlBuilder.Params = make(map[string]string)
 		htmlBuilder.Params["error"] = pageError.Error()
 	}
-	php2go.Dump(htmlBuilder)
 	return response.Html(ctx, html.ToContent(htmlBuilder))
 }
 
 func HomePage(ctx iris.Context) bool {
-	return page(ctx, "home")
+	params := make(map[string]string)
+	params["title"] = "h-assets"
+	params["tips"] = "Welcome!~h-assets"
+	return page(ctx, "home", params)
 }

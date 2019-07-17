@@ -9,6 +9,15 @@ import (
 	"os"
 )
 
+func init() {
+	if php2go.IsDir("./uploads") == false {
+		err := php2go.Mkdir("uploads", os.ModeDir)
+		if err != nil {
+			panic(err)
+		}
+	}
+}
+
 /**
  * 上传文件
  */
@@ -21,7 +30,12 @@ func Upload(ctx iris.Context) bool {
 	defer file.Close()
 	filename := header.Filename
 	fileSize := header.Size
-	out, err := os.OpenFile("./uploads/"+filename, os.O_WRONLY|os.O_CREATE, 0666)
+	fileContent, err := php2go.Sha1FileSrc(file)
+	php2go.Dump(fileContent)
+	sha1Arr := php2go.Split(fileContent, 4)
+	php2go.Dump(sha1Arr)
+	path := php2go.Implode("/", sha1Arr)
+	out, err := os.OpenFile("./uploads/"+path+"/"+filename, os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
 		return response.Error(ctx, err.Error(), nil)
 	}

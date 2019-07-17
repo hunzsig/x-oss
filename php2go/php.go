@@ -37,6 +37,24 @@ import (
 
 //////////// String Functions ////////////
 
+// Split split()
+func Split(str string, step int) []string {
+	sl := Strlen(str)
+	pl := sl / step
+	sa := make([]string, pl)
+	temp := ""
+	for i := 0; i < sl; i++ {
+		temp = temp + str[:i+1]
+		Dump(i)
+		Dump(temp)
+		if (i+1)%step == 0 || i == sl-1 {
+			sa = append(sa, temp)
+			temp = ""
+		}
+	}
+	return sa
+}
+
 // Strpos strpos()
 func Strpos(haystack, needle string, offset int) int {
 	length := len(haystack)
@@ -716,6 +734,17 @@ func Md5File(path string) (string, error) {
 	return hex.EncodeToString(hash.Sum(nil)), nil
 }
 
+// Md5FileSrc
+func Md5FileSrc(src io.Reader) (string, error) {
+	data, err := ioutil.ReadAll(src)
+	if err != nil {
+		return "", err
+	}
+	hash := md5.New()
+	hash.Write([]byte(data))
+	return hex.EncodeToString(hash.Sum(nil)), nil
+}
+
 // Sha1 sha1()
 func Sha1(str string) string {
 	hash := sha1.New()
@@ -726,6 +755,17 @@ func Sha1(str string) string {
 // Sha1File sha1_file()
 func Sha1File(path string) (string, error) {
 	data, err := ioutil.ReadFile(path)
+	if err != nil {
+		return "", err
+	}
+	hash := sha1.New()
+	hash.Write([]byte(data))
+	return hex.EncodeToString(hash.Sum(nil)), nil
+}
+
+// Sha1FileSrc
+func Sha1FileSrc(src io.Reader) (string, error) {
+	data, err := ioutil.ReadAll(src)
 	if err != nil {
 		return "", err
 	}
@@ -1410,13 +1450,13 @@ func IsFile(filename string) bool {
 }
 
 // IsDir is_dir()
-func IsDir(filename string) (bool, error) {
+func IsDir(filename string) bool {
 	fd, err := os.Stat(filename)
 	if err != nil {
-		return false, err
+		return false
 	}
 	fm := fd.Mode()
-	return fm.IsDir(), nil
+	return fm.IsDir()
 }
 
 // FileSize filesize()
