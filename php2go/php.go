@@ -40,8 +40,7 @@ import (
 // Split split()
 func Split(str string, step int) []string {
 	sl := Strlen(str)
-	pl := sl / step
-	sa := make([]string, pl)
+	sa := make([]string, 0)
 	temp := ""
 	for i := 0; i < sl; i++ {
 		temp = temp + string(str[i])
