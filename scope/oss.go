@@ -22,7 +22,7 @@ func init() {
 /**
  * 分析文件，并返回文件信息
  */
-func analysisFile(file multipart.File, header multipart.FileHeader) (map[string]string, error) {
+func analysisFile(file multipart.File, header *multipart.FileHeader) (map[string]string, error) {
 	fileInfo := make(map[string]string)
 	if file == nil {
 		newFile, err := header.Open()
@@ -30,6 +30,7 @@ func analysisFile(file multipart.File, header multipart.FileHeader) (map[string]
 			return fileInfo, err
 		}
 		file = newFile
+		defer file.Close()
 	}
 	fileNameSep := php2go.Explode(".", header.Filename)
 	// 后缀名
@@ -65,28 +66,8 @@ func UploadOne(ctx iris.Context) bool {
 		return response.Error(ctx, err.Error(), nil)
 	}
 	defer file.Close()
-	fileNameSep := php2go.Explode(".", header.Filename)
-	// 后缀名
-	fileSuffix := fileNameSep[len(fileNameSep)-1]
-	fileNameSep = fileNameSep[:len(fileNameSep)-1]
-	// 文件名
-	fileName := php2go.Implode(".", fileNameSep)
-	// 文件大小
-	fileSize := header.Size
-	fileContent, err := php2go.Sha1FileSrc(file)
-	php2go.Dump(fileContent)
-	sha1Arr := php2go.Split(fileContent, 4)
-	php2go.Dump(sha1Arr)
-	// 文件路径
-	filePath := "./uploads/" + php2go.Implode("/", sha1Arr) + "/"
-
-	out, err := os.OpenFile(filePath+fileName, os.O_WRONLY|os.O_CREATE, 0666)
-	if err != nil {
-		return response.Error(ctx, err.Error(), nil)
-	}
-	defer out.Close()
-	io.Copy(out, file)
-	return response.Success(ctx, string(fileSize), nil)
+	fileInfo, err := analysisFile(file, header)
+	return response.Success(ctx, fileInfo["size"], nil)
 }
 
 /**

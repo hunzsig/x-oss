@@ -1,6 +1,7 @@
 package main
 
 import (
+	"./php2go"
 	"./scope"
 	"github.com/kataras/iris"
 )
@@ -15,7 +16,10 @@ func route(app *iris.Application) {
 		scope.HomePage(ctx)
 	})
 
-	oss := app.Party("/oss")
+	oss := app.Party("/oss", func(ctx iris.Context) {
+		php2go.Dump(ctx)
+		ctx.Next()
+	})
 	{
 		// one file which is uploaded
 		oss.Post("/upload/one", iris.LimitRequestBodySize(fileMaxSize), func(ctx iris.Context) {
