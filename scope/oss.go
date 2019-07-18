@@ -33,26 +33,26 @@ func analysisFile(file multipart.File, header multipart.FileHeader) (map[string]
 	}
 	fileNameSep := php2go.Explode(".", header.Filename)
 	// 后缀名
-	fileSuffix := fileNameSep[len(fileNameSep)-1]
+	fileInfo["suffix"] = fileNameSep[len(fileNameSep)-1]
 	fileNameSep = fileNameSep[:len(fileNameSep)-1]
 	// 文件名
-	fileName := php2go.Implode(".", fileNameSep)
+	fileInfo["name"] = php2go.Implode(".", fileNameSep)
 	// 文件大小
-	fileSize := header.Size
-	fileContent, err := php2go.Sha1FileSrc(file)
-	php2go.Dump(fileContent)
-	sha1Arr := php2go.Split(fileContent, 4)
+	fileInfo["size"] = string(header.Size)
+	fileSha1, err := php2go.Sha1FileSrc(file)
+	fileInfo["sha1"] = fileSha1
+	php2go.Dump(fileSha1)
+	sha1Arr := php2go.Split(fileSha1, 4)
 	php2go.Dump(sha1Arr)
 	// 文件路径
-	filePath := "./uploads/" + php2go.Implode("/", sha1Arr) + "/"
-
-	out, err := os.OpenFile(filePath+fileName, os.O_WRONLY|os.O_CREATE, 0666)
+	fileInfo["path"] = "./uploads/" + php2go.Implode("/", sha1Arr) + "/"
+	out, err := os.OpenFile(fileInfo["path"]+fileInfo["name"], os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
-		return response.Error(ctx, err.Error(), nil)
+		return fileInfo, err
 	}
 	defer out.Close()
 	io.Copy(out, file)
-
+	return fileInfo, nil
 }
 
 /**
