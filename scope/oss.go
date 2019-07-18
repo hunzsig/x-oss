@@ -74,36 +74,26 @@ func UploadOne(ctx iris.Context) bool {
  * 上传文件（多个）
  */
 func UploadMulti(ctx iris.Context) bool {
-	// Get the file from the request.
-	file, header, err := ctx.FormFile("file")
-	php2go.Dump(file)
-	panic("3")
+	//获取通过iris.WithPostMaxMemory获取的最大上传值大小。
+	maxSize := ctx.Application().ConfigurationReadOnly().GetPostMaxMemory()
+	err := ctx.Request().ParseMultipartForm(maxSize)
 	if err != nil {
-		return response.Error(ctx, err.Error(), nil)
+		ctx.StatusCode(iris.StatusInternalServerError)
+		ctx.WriteString(err.Error())
 	}
-	defer file.Close()
-	fileNameSep := php2go.Explode(".", header.Filename)
-	// 后缀名
-	fileSuffix := fileNameSep[len(fileNameSep)-1]
-	fileNameSep = fileNameSep[:len(fileNameSep)-1]
-	// 文件名
-	fileName := php2go.Implode(".", fileNameSep)
-	// 文件大小
-	fileSize := header.Size
-	fileContent, err := php2go.Sha1FileSrc(file)
-	php2go.Dump(fileContent)
-	sha1Arr := php2go.Split(fileContent, 4)
-	php2go.Dump(sha1Arr)
-	// 文件路径
-	filePath := "./uploads/" + php2go.Implode("/", sha1Arr) + "/"
-
-	out, err := os.OpenFile(filePath+fileName, os.O_WRONLY|os.O_CREATE, 0666)
-	if err != nil {
-		return response.Error(ctx, err.Error(), nil)
+	/*
+	form := ctx.Request().MultipartForm
+	files := form.File["files[]"]
+	failures := 0
+	for _, file := range files {
+		_, err = saveUploadedFile(file, "./uploads")
+		if err != nil {
+			failures++
+			ctx.Writef("failed to upload: %s\n", file.Filename)
+		}
 	}
-	defer out.Close()
-	io.Copy(out, file)
-	return response.Success(ctx, string(fileSize), nil)
+	*/
+	return true
 }
 
 /**

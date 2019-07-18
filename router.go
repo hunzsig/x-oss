@@ -2,6 +2,7 @@ package main
 
 import (
 	"./php2go"
+	"./response"
 	"./scope"
 	"github.com/kataras/iris"
 )
@@ -17,24 +18,25 @@ func route(app *iris.Application) {
 	})
 
 	oss := app.Party("/oss", func(ctx iris.Context) {
-		php2go.Dump(ctx)
-		ctx.Next()
+		uploadType := ctx.Params().Get("token")
 	})
 	{
 		// one file which is uploaded
-		oss.Post("/upload/one", iris.LimitRequestBodySize(fileMaxSize), func(ctx iris.Context) {
-			scope.UploadOne(ctx)
-		})
-
-		// multi files which is uploaded
-		oss.Post("/upload/multi", iris.LimitRequestBodySize(multiFileMaxSize), func(ctx iris.Context) {
-			scope.UploadMulti(ctx)
+		oss.Post("/upload/{type:string}", func(ctx iris.Context) {
+			uploadType := ctx.Params().Get("type")
+			response.Success(ctx, uploadType, nil)
+			if uploadType == "multi" {
+				ctx.SetMaxRequestBodySize(multiFileMaxSize + 1<<20)
+				scope.UploadMulti(ctx)
+			} else {
+				ctx.SetMaxRequestBodySize(fileMaxSize + 1<<20)
+				scope.UploadOne(ctx)
+			}
 		})
 
 		// download file by token
-		oss.Get("/download/{token:string}", func(ctx iris.Context) {
+		oss.Get("/download/{sha1:string}", func(ctx iris.Context) {
 			scope.Download(ctx)
 		})
 	}
-
 }
