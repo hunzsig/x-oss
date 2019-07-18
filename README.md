@@ -1,4 +1,4 @@
-# h-assets
+# x-oss
 
 ---
 
@@ -12,9 +12,9 @@ go get -u github.com/go-sql-driver/mysql
 ```
 windos
 # go build
-# h-assets.exe
+# x-oss.exe
 
 unix
 # go build
-# ./h-assets
+# ./x-oss
 ```
