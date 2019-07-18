@@ -5,7 +5,8 @@ import (
 	"github.com/kataras/iris"
 )
 
-const fileMaxSize = 30 << 20 // 30MB
+const fileMaxSize = 10 << 20      // 10MB
+const multiFileMaxSize = 50 << 20 // 50MB
 
 func route(app *iris.Application) {
 
@@ -16,9 +17,14 @@ func route(app *iris.Application) {
 
 	oss := app.Party("/oss")
 	{
-		// handle files which is uploaded
-		oss.Post("/upload", iris.LimitRequestBodySize(fileMaxSize+1<<20), func(ctx iris.Context) {
-			scope.Upload(ctx)
+		// one file which is uploaded
+		oss.Post("/upload/one", iris.LimitRequestBodySize(fileMaxSize), func(ctx iris.Context) {
+			scope.UploadOne(ctx)
+		})
+
+		// multi files which is uploaded
+		oss.Post("/upload/multi", iris.LimitRequestBodySize(multiFileMaxSize), func(ctx iris.Context) {
+			scope.UploadMulti(ctx)
 		})
 
 		// download file by token

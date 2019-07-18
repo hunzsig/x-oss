@@ -6,6 +6,7 @@ import (
 	"../response"
 	"github.com/kataras/iris"
 	"io"
+	"mime/multipart"
 	"os"
 )
 
@@ -19,23 +20,103 @@ func init() {
 }
 
 /**
- * 上传文件
+ * 分析文件，并返回文件信息
  */
-func Upload(ctx iris.Context) bool {
+func analysisFile(file multipart.File, header multipart.FileHeader) (map[string]string, error) {
+	fileInfo := make(map[string]string)
+	if file == nil {
+		newFile, err := header.Open()
+		if err != nil {
+			return fileInfo, err
+		}
+		file = newFile
+	}
+	fileNameSep := php2go.Explode(".", header.Filename)
+	// 后缀名
+	fileSuffix := fileNameSep[len(fileNameSep)-1]
+	fileNameSep = fileNameSep[:len(fileNameSep)-1]
+	// 文件名
+	fileName := php2go.Implode(".", fileNameSep)
+	// 文件大小
+	fileSize := header.Size
+	fileContent, err := php2go.Sha1FileSrc(file)
+	php2go.Dump(fileContent)
+	sha1Arr := php2go.Split(fileContent, 4)
+	php2go.Dump(sha1Arr)
+	// 文件路径
+	filePath := "./uploads/" + php2go.Implode("/", sha1Arr) + "/"
+
+	out, err := os.OpenFile(filePath+fileName, os.O_WRONLY|os.O_CREATE, 0666)
+	if err != nil {
+		return response.Error(ctx, err.Error(), nil)
+	}
+	defer out.Close()
+	io.Copy(out, file)
+
+}
+
+/**
+ * 上传文件（一个）
+ */
+func UploadOne(ctx iris.Context) bool {
 	// Get the file from the request.
 	file, header, err := ctx.FormFile("file")
 	if err != nil {
 		return response.Error(ctx, err.Error(), nil)
 	}
 	defer file.Close()
-	filename := header.Filename
+	fileNameSep := php2go.Explode(".", header.Filename)
+	// 后缀名
+	fileSuffix := fileNameSep[len(fileNameSep)-1]
+	fileNameSep = fileNameSep[:len(fileNameSep)-1]
+	// 文件名
+	fileName := php2go.Implode(".", fileNameSep)
+	// 文件大小
 	fileSize := header.Size
 	fileContent, err := php2go.Sha1FileSrc(file)
 	php2go.Dump(fileContent)
 	sha1Arr := php2go.Split(fileContent, 4)
 	php2go.Dump(sha1Arr)
-	path := php2go.Implode("/", sha1Arr)
-	out, err := os.OpenFile("./uploads/"+path+"/"+filename, os.O_WRONLY|os.O_CREATE, 0666)
+	// 文件路径
+	filePath := "./uploads/" + php2go.Implode("/", sha1Arr) + "/"
+
+	out, err := os.OpenFile(filePath+fileName, os.O_WRONLY|os.O_CREATE, 0666)
+	if err != nil {
+		return response.Error(ctx, err.Error(), nil)
+	}
+	defer out.Close()
+	io.Copy(out, file)
+	return response.Success(ctx, string(fileSize), nil)
+}
+
+/**
+ * 上传文件（多个）
+ */
+func UploadMulti(ctx iris.Context) bool {
+	// Get the file from the request.
+	file, header, err := ctx.FormFile("file")
+	php2go.Dump(file)
+	panic("3")
+	if err != nil {
+		return response.Error(ctx, err.Error(), nil)
+	}
+	defer file.Close()
+	fileNameSep := php2go.Explode(".", header.Filename)
+	// 后缀名
+	fileSuffix := fileNameSep[len(fileNameSep)-1]
+	fileNameSep = fileNameSep[:len(fileNameSep)-1]
+	// 文件名
+	fileName := php2go.Implode(".", fileNameSep)
+	// 文件大小
+	fileSize := header.Size
+	fileContent, err := php2go.Sha1FileSrc(file)
+	php2go.Dump(fileContent)
+	sha1Arr := php2go.Split(fileContent, 4)
+	php2go.Dump(sha1Arr)
+	// 文件路径
+	filePath := "./uploads/" + php2go.Implode("/", sha1Arr) + "/"
+
+	out, err := os.OpenFile(filePath+fileName, os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
 		return response.Error(ctx, err.Error(), nil)
 	}
