@@ -1,7 +1,6 @@
 package main
 
 import (
-	"./php2go"
 	"./response"
 	"./scope"
 	"github.com/kataras/iris"
@@ -18,7 +17,12 @@ func route(app *iris.Application) {
 	})
 
 	oss := app.Party("/oss", func(ctx iris.Context) {
-		uploadType := ctx.Params().Get("token")
+		token := ctx.Params().Get("token")
+		if token != "abcdefg" {
+			response.Error(ctx, "token break", nil)
+		} else {
+			ctx.Next()
+		}
 	})
 	{
 		// one file which is uploaded
@@ -35,8 +39,8 @@ func route(app *iris.Application) {
 		})
 
 		// download file by token
-		oss.Get("/download/{sha1:string}", func(ctx iris.Context) {
-			scope.Download(ctx)
+		oss.Get("/download/{fileKey:string}", func(ctx iris.Context) {
+			scope.Download(ctx, ctx.Params().Get("fileKey"))
 		})
 	}
 }

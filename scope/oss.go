@@ -82,16 +82,16 @@ func UploadMulti(ctx iris.Context) bool {
 		ctx.WriteString(err.Error())
 	}
 	/*
-	form := ctx.Request().MultipartForm
-	files := form.File["files[]"]
-	failures := 0
-	for _, file := range files {
-		_, err = saveUploadedFile(file, "./uploads")
-		if err != nil {
-			failures++
-			ctx.Writef("failed to upload: %s\n", file.Filename)
+		form := ctx.Request().MultipartForm
+		files := form.File["files[]"]
+		failures := 0
+		for _, file := range files {
+			_, err = saveUploadedFile(file, "./uploads")
+			if err != nil {
+				failures++
+				ctx.Writef("failed to upload: %s\n", file.Filename)
+			}
 		}
-	}
 	*/
 	return true
 }
@@ -99,7 +99,7 @@ func UploadMulti(ctx iris.Context) bool {
 /**
  * 根据token下载文件
  */
-func Download(ctx iris.Context) bool {
+func Download(ctx iris.Context, fileKey string) bool {
 	result, err := database.Mysql().Query("select * from `test`")
 	if err != nil {
 		return response.Error(ctx, err.Error(), nil)
