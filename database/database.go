@@ -6,6 +6,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
+
 func Connect(name string) *sql.DB {
 	link := get(name)
 	dbDsn := dsn(link)

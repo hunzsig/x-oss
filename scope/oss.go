@@ -2,13 +2,11 @@ package scope
 
 import (
 	"../database"
+	"../oss"
 	"../php2go"
 	"../response"
 	"github.com/kataras/iris"
-	"io"
-	"mime/multipart"
 	"os"
-	"strconv"
 )
 
 func init() {
@@ -21,44 +19,6 @@ func init() {
 }
 
 /**
- * 分析文件，并返回文件信息
- */
-func analysisFile(file multipart.File, header *multipart.FileHeader) (map[string]string, error) {
-	fileInfo := make(map[string]string)
-	if file == nil {
-		newFile, err := header.Open()
-		if err != nil {
-			return fileInfo, err
-		}
-		file = newFile
-		defer file.Close()
-	}
-	fileNameSep := php2go.Explode(".", header.Filename)
-	// 后缀名
-	fileInfo["suffix"] = fileNameSep[len(fileNameSep)-1]
-	fileNameSep = fileNameSep[:len(fileNameSep)-1]
-	// 文件名
-	fileInfo["name"] = php2go.Implode(".", fileNameSep)
-	fileInfo["token_name"] = strconv.FormatInt(php2go.Microtime(), 10)
-	// 文件大小
-	fileInfo["size"] = string(header.Size)
-	fileSha1, err := php2go.Sha1FileSrc(file)
-	fileInfo["sha1"] = fileSha1
-	sha1Arr := php2go.Split(fileSha1, 4)
-	// 文件路径
-	fileInfo["path"] = "./uploads/" + php2go.Implode("/", sha1Arr) + "/"
-	fileInfo["uri"] = fileInfo["path"] + fileInfo["token_name"] + "." + fileInfo["suffix"]
-	out, err := os.OpenFile(fileInfo["uri"], os.O_WRONLY|os.O_CREATE, 0666)
-	if err != nil {
-		return fileInfo, err
-	}
-	defer out.Close()
-	io.Copy(out, file)
-	php2go.Dump(fileInfo)
-	return fileInfo, nil
-}
-
-/**
  * 上传文件（一个）
  */
 func UploadOne(ctx iris.Context) bool {
@@ -68,7 +28,10 @@ func UploadOne(ctx iris.Context) bool {
 		return response.Error(ctx, err.Error(), nil)
 	}
 	defer file.Close()
-	fileInfo, err := analysisFile(file, header)
+	fileInfo, err := oss.AnalysisFile(file, header)
+	if err != nil {
+		return response.Error(ctx, err.Error(), nil)
+	}
 	return response.Success(ctx, fileInfo["size"], nil)
 }
 

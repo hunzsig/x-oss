@@ -1,6 +1,7 @@
 package main
 
 import (
+	"./database"
 	"./response"
 	"./scope"
 	"github.com/kataras/iris"
@@ -19,7 +20,13 @@ func route(app *iris.Application) {
 	oss := app.Party("/oss/{token:string}", func(ctx iris.Context) {
 		token := ctx.Params().Get("token")
 		if token != "abcdefg" {
-			response.Error(ctx, "token not allow", nil)
+			result, err := database.Mysql().Query("select * from `user` where `token` = " + token + " limit 1")
+			if err != nil {
+				response.Error(ctx, "token not allow", nil)
+			}
+			php2go.Dump(result)
+			ctx.Params().Set("user_token",)
+			ctx.Params().Set("user_exp",)
 		} else {
 			ctx.Next()
 		}
