@@ -16,10 +16,10 @@ func route(app *iris.Application) {
 		scope.HomePage(ctx)
 	})
 
-	oss := app.Party("/oss", func(ctx iris.Context) {
+	oss := app.Party("/oss/{token:string}", func(ctx iris.Context) {
 		token := ctx.Params().Get("token")
 		if token != "abcdefg" {
-			response.Error(ctx, "token break", nil)
+			response.Error(ctx, "token not allow", nil)
 		} else {
 			ctx.Next()
 		}
@@ -28,7 +28,6 @@ func route(app *iris.Application) {
 		// one file which is uploaded
 		oss.Post("/upload/{type:string}", func(ctx iris.Context) {
 			uploadType := ctx.Params().Get("type")
-			response.Success(ctx, uploadType, nil)
 			if uploadType == "multi" {
 				ctx.SetMaxRequestBodySize(multiFileMaxSize + 1<<20)
 				scope.UploadMulti(ctx)

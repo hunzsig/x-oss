@@ -8,6 +8,7 @@ import (
 	"io"
 	"mime/multipart"
 	"os"
+	"strconv"
 )
 
 func init() {
@@ -38,21 +39,22 @@ func analysisFile(file multipart.File, header *multipart.FileHeader) (map[string
 	fileNameSep = fileNameSep[:len(fileNameSep)-1]
 	// 文件名
 	fileInfo["name"] = php2go.Implode(".", fileNameSep)
+	fileInfo["token_name"] = strconv.FormatInt(php2go.Microtime(), 10)
 	// 文件大小
 	fileInfo["size"] = string(header.Size)
 	fileSha1, err := php2go.Sha1FileSrc(file)
 	fileInfo["sha1"] = fileSha1
-	php2go.Dump(fileSha1)
 	sha1Arr := php2go.Split(fileSha1, 4)
-	php2go.Dump(sha1Arr)
 	// 文件路径
 	fileInfo["path"] = "./uploads/" + php2go.Implode("/", sha1Arr) + "/"
-	out, err := os.OpenFile(fileInfo["path"]+fileInfo["name"], os.O_WRONLY|os.O_CREATE, 0666)
+	fileInfo["uri"] = fileInfo["path"] + fileInfo["token_name"] + "." + fileInfo["suffix"]
+	out, err := os.OpenFile(fileInfo["uri"], os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
 		return fileInfo, err
 	}
 	defer out.Close()
 	io.Copy(out, file)
+	php2go.Dump(fileInfo)
 	return fileInfo, nil
 }
 
