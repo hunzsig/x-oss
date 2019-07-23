@@ -2,7 +2,6 @@ package database
 
 import (
 	"fmt"
-	_ "github.com/go-sql-driver/mysql"
 )
 
 func dsn(conf map[string]string) string {
@@ -13,7 +12,10 @@ func dsn(conf map[string]string) string {
 			"%s:%s@tcp(%s:%s)/%s?parseTime=true",
 			conf["account"], conf["password"], conf["host"], conf["port"], conf["name"])
 	case "pysql":
-		dsnString = fmt.Sprintf("port=$s user=%s password=%s dbname=%s sslmode=disable", "postgres", "123456", "postgres")
+		dsnString = fmt.Sprintf(
+			"port=$s user=%s password=%s dbname=%s sslmode=disable", "postgres", "123456", "postgres")
+	case "redis":
+		dsnString = fmt.Sprintf("%s:%s", conf["host"], conf["port"])
 	}
 	return dsnString
 }
