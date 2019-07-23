@@ -86,7 +86,7 @@ func (gdo *gdo) Table(val string) *gdo {
 }
 
 // 设置 field
-func (gdo *gdo) Field(val string) *gdo {
+func (gdo *gdo) Field(val string, table string) *gdo {
 	if gdo.obj != nil {
 		gdo.options["field"] = val
 	}
