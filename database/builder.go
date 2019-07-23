@@ -22,17 +22,3 @@ func dsn(conf map[string]string) string {
 	}
 	return dsnString
 }
-
-// 构建 select sql 模板
-func selectTpl(conf map[string]string) string {
-	tplStr := ""
-	switch conf["type"] {
-	case mapping.DBType.Mysql.Value:
-		tplStr = ""
-	case mapping.DBType.Pgsql.Value:
-		tplStr = ""
-	default:
-		panic("select tpl not support type:" + conf["type"])
-	}
-	return tplStr
-}

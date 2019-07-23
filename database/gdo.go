@@ -62,7 +62,7 @@ func (gdo *gdo) buildSelectSql() string {
 	case mapping.DBType.Mysql.Value:
 		sqlStr += "SELECT "
 	case mapping.DBType.Pgsql.Value:
-		sqlStr += "SE"
+		sqlStr += "SELECT "
 	default:
 		panic("select tpl not support type:" + gdo.dbType)
 	}
