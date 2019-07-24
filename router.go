@@ -3,7 +3,6 @@ package main
 import (
 	"./database"
 	"./php2go"
-	"./response"
 	"./scope"
 	"github.com/kataras/iris"
 )
@@ -15,6 +14,10 @@ func route(app *iris.Application) {
 
 	// default home
 	app.Handle("GET", "/", func(ctx iris.Context) {
+
+		a := php2go.Trim("   c  dsa   ")
+		php2go.Dump(a)
+
 		scope.HomePage(ctx)
 	})
 
@@ -22,9 +25,11 @@ func route(app *iris.Application) {
 		token := ctx.Params().Get("token")
 		if token != "" {
 			result := database.Mysql().Table("user").Field("*", "user").One()
+			/*
 			if err != nil {
 				response.NotPermission(ctx, "token forbidden", nil)
 			}
+			 */
 			php2go.Dump(result)
 			ctx.Params().Set("user_token", "3")
 			ctx.Params().Set("user_exp", "4")

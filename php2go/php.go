@@ -571,7 +571,7 @@ func StrShuffle(str string) string {
 func Trim(str string, characterMask ...string) string {
 	mask := ""
 	if len(characterMask) == 0 {
-		mask = " \\t\\n\\r\\0\\x0B"
+		mask = " \\x00\\x08\\x09\\x0A\\x0B\\x0C\\x0D\\x20"
 	} else {
 		mask = characterMask[0]
 	}

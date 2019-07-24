@@ -5,16 +5,18 @@ import (
 	"../php2go"
 	"database/sql"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/kataras/iris/core/errors"
 	"regexp"
 	"strconv"
+	"strings"
 )
 
 // DB 对象
 type gdo struct {
 	dbType  string
 	dsn     string
-	options map[string]string
 	obj     *sql.DB
+	options map[string]string
 }
 
 // 连接,并返回一个GDO
@@ -37,6 +39,7 @@ func GDO(name string) *gdo {
 	gdo.dbType = link["type"]
 	gdo.dsn = dbDsn
 	gdo.obj = dbObj
+	gdo.options = make(map[string]string)
 	return gdo
 }
 
@@ -51,10 +54,12 @@ func (gdo *gdo) parseKey(key string) string {
 	if key == "" {
 		return key
 	}
+	php2go.Dump(key)
 	key = php2go.Trim(key)
 	if php2go.IsNumeric(key) {
 		return key
 	}
+	php2go.Dump(key)
 	match, err := regexp.MatchString(`[,'"*()`+"`"+`.\s]`, key)
 	if err != nil || match == true {
 		return key
@@ -73,8 +78,46 @@ func (gdo *gdo) parseKey(key string) string {
 }
 
 // query
-func (gdo *gdo) Query(command string) (interface{}, error) {
-
+func (gdo *gdo) Query(query string) (interface{}, error) {
+	php2go.Dump(gdo.options)
+	php2go.Dump(query)
+	queryItems := php2go.Explode(" ", query)
+	if gdo.options["table"] == "" {
+		return false, errors.New("lose table")
+	}
+	statement := strings.ToLower(queryItems[0])
+	//read model,check cache
+	if statement == "select" || statement == "show" {
+		// cache
+	}
+	// 执行新一轮的查询，并释放上一轮结果
+	if statement == "select" || statement == "show" {
+		rows, err := gdo.obj.Query(query)
+		if err != nil {
+			return false, err
+		}
+		php2go.Dump(rows)
+	} else if statement == "insert" {
+		result, err := gdo.obj.Exec(query)
+		if err != nil {
+			return false, err
+		}
+		id, err := result.LastInsertId()
+		if err != nil {
+			return false, err
+		}
+		return id, nil
+	} else if statement == "update" || statement == "delete" {
+		result, err := gdo.obj.Exec(query)
+		if err != nil {
+			return false, err
+		}
+		num, err := result.RowsAffected()
+		if err != nil {
+			return false, err
+		}
+		return num, nil
+	}
 	return true, nil
 }
 
@@ -82,10 +125,7 @@ func (gdo *gdo) Query(command string) (interface{}, error) {
 func (gdo *gdo) buildSelectSql() string {
 	sqlStr := ""
 	if gdo.obj == nil {
-		panic("obj error")
-	}
-	if gdo.options["table"] == "" {
-		panic("table error")
+		return sqlStr
 	}
 	switch gdo.dbType {
 	case mapping.DBType.Mysql.Value:
@@ -108,7 +148,10 @@ func (gdo *gdo) buildSelectSql() string {
 			sqlStr += " order by " + gdo.options["orderBy"]
 		}
 		if gdo.options["limit"] != "" {
-			sqlStr += " " + gdo.options["limit"]
+			sqlStr += " limit" + gdo.options["limit"]
+		}
+		if gdo.options["offset"] != "" {
+			sqlStr += " offset" + gdo.options["offset"]
 		}
 	case mapping.DBType.Pgsql.Value:
 		sqlStr += "select "
@@ -145,12 +188,11 @@ func (gdo *gdo) Field(val string, table string) *gdo {
 		appendArr := php2go.Explode(",", val)
 		for _, v := range appendArr {
 			if !php2go.InArray(v, fieldArr) {
-				fieldArr = append(fieldArr, gdo.parseKey(table)+gdo.parseKey(v))
+				fieldArr = append(fieldArr, gdo.parseKey(table)+"."+gdo.parseKey(v))
 			}
 		}
 		gdo.options["field"] = php2go.Implode(",", fieldArr)
 	}
-	php2go.Dump(gdo.options["field"])
 	return gdo
 }
 
@@ -184,7 +226,7 @@ func (gdo *gdo) Multi() []map[string]string {
 // get one
 func (gdo *gdo) One() map[string]string {
 	result := make(map[string]string)
-	gdo.options["limit"] = "1"
+	gdo.Limit(1)
 	itf, err := gdo.Query(gdo.buildSelectSql())
 	if err != nil {
 		return result
