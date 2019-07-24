@@ -89,9 +89,29 @@ func (gdo *gdo) buildSelectSql() string {
 	}
 	switch gdo.dbType {
 	case mapping.DBType.Mysql.Value:
-		sqlStr += "SELECT "
+		sqlStr += "select " + gdo.options["field"] + " from"
+		if gdo.options["schema"] != "" {
+			sqlStr += " " + gdo.options["schema"] + "." + gdo.options["table"]
+		} else {
+			sqlStr += " " + gdo.options["table"]
+		}
+		if gdo.options["join"] != "" {
+			sqlStr += " " + gdo.options["join"]
+		}
+		if gdo.options["where"] != "" {
+			sqlStr += " where " + gdo.options["where"]
+		}
+		if gdo.options["groupBy"] != "" {
+			sqlStr += " group by " + gdo.options["groupBy"]
+		}
+		if gdo.options["orderBy"] != "" {
+			sqlStr += " order by " + gdo.options["orderBy"]
+		}
+		if gdo.options["limit"] != "" {
+			sqlStr += " " + gdo.options["limit"]
+		}
 	case mapping.DBType.Pgsql.Value:
-		sqlStr += "SELECT "
+		sqlStr += "select "
 	default:
 		panic("select tpl not support type:" + gdo.dbType)
 	}
@@ -101,7 +121,7 @@ func (gdo *gdo) buildSelectSql() string {
 // 设置 Schema
 func (gdo *gdo) Schema(val string) *gdo {
 	if gdo.obj != nil {
-		gdo.options["schema"] = val
+		gdo.options["schema"] = gdo.parseKey(val)
 	}
 	return gdo
 }
@@ -109,7 +129,7 @@ func (gdo *gdo) Schema(val string) *gdo {
 // 设置 table
 func (gdo *gdo) Table(val string) *gdo {
 	if gdo.obj != nil {
-		gdo.options["table"] = val
+		gdo.options["table"] = gdo.parseKey(val)
 	}
 	return gdo
 }
@@ -148,6 +168,17 @@ func (gdo *gdo) Offset(val int) *gdo {
 		gdo.options["offset"] = strconv.Itoa(val)
 	}
 	return gdo
+}
+
+// get multi
+func (gdo *gdo) Multi() []map[string]string {
+	result := make([]map[string]string, 0)
+	itf, err := gdo.Query(gdo.buildSelectSql())
+	if err != nil {
+		return result
+	}
+	php2go.Dump(itf)
+	return result
 }
 
 // get one

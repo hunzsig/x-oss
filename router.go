@@ -20,10 +20,10 @@ func route(app *iris.Application) {
 
 	oss := app.Party("/oss/{token:string}", func(ctx iris.Context) {
 		token := ctx.Params().Get("token")
-		if token != "abcdefg" {
-			result, err := database.Mysql().Query("select * from `user` where `token` = " + token + " limit 1")
+		if token != "" {
+			result := database.Mysql().Table("user").Field("*", "user").One()
 			if err != nil {
-				response.Error(ctx, "token not allow", nil)
+				response.NotPermission(ctx, "token forbidden", nil)
 			}
 			php2go.Dump(result)
 			ctx.Params().Set("user_token", "3")
