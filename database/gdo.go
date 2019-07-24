@@ -5,6 +5,7 @@ import (
 	"../php2go"
 	"database/sql"
 	_ "github.com/go-sql-driver/mysql"
+	"regexp"
 	"strconv"
 )
 
@@ -41,6 +42,34 @@ func GDO(name string) *gdo {
 
 func Mysql() *gdo {
 	return GDO("mysql")
+}
+
+// ---------------------------------------------
+
+// 处理 key 为对应数据库形式
+func (gdo *gdo) parseKey(key string) string {
+	if key == "" {
+		return key
+	}
+	key = php2go.Trim(key)
+	if php2go.IsNumeric(key) {
+		return key
+	}
+	match, err := regexp.MatchString(`[,'"*()`+"`"+`.\s]`, key)
+	if err != nil || match == true {
+		return key
+	}
+	switch gdo.dbType {
+	case mapping.DBType.Mysql.Value:
+		key = "`" + php2go.Trim(key) + "`"
+	case mapping.DBType.Pgsql.Value:
+		fallthrough
+	case mapping.DBType.Mssql.Value:
+		key = "\"" + php2go.Trim(key) + "\""
+	case mapping.DBType.Sqlite.Value:
+		key = "'" + php2go.Trim(key) + "'"
+	}
+	return key
 }
 
 // query
@@ -86,10 +115,22 @@ func (gdo *gdo) Table(val string) *gdo {
 }
 
 // 设置 field
+// 以comma形式分割多个
 func (gdo *gdo) Field(val string, table string) *gdo {
 	if gdo.obj != nil {
-		gdo.options["field"] = val
+		fieldArr := make([]string, 0)
+		if gdo.options["field"] != "" {
+			fieldArr = php2go.Explode(",", gdo.options["field"])
+		}
+		appendArr := php2go.Explode(",", val)
+		for _, v := range appendArr {
+			if !php2go.InArray(v, fieldArr) {
+				fieldArr = append(fieldArr, gdo.parseKey(table)+gdo.parseKey(v))
+			}
+		}
+		gdo.options["field"] = php2go.Implode(",", fieldArr)
 	}
+	php2go.Dump(gdo.options["field"])
 	return gdo
 }
 

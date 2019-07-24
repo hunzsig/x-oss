@@ -2,6 +2,7 @@ package main
 
 import (
 	"./database"
+	"./php2go"
 	"./response"
 	"./scope"
 	"github.com/kataras/iris"
@@ -25,8 +26,8 @@ func route(app *iris.Application) {
 				response.Error(ctx, "token not allow", nil)
 			}
 			php2go.Dump(result)
-			ctx.Params().Set("user_token",)
-			ctx.Params().Set("user_exp",)
+			ctx.Params().Set("user_token", "3")
+			ctx.Params().Set("user_exp", "4")
 		} else {
 			ctx.Next()
 		}
