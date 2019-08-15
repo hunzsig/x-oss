@@ -14,10 +14,6 @@ func route(app *iris.Application) {
 
 	// default home
 	app.Handle("GET", "/", func(ctx iris.Context) {
-
-		a := php2go.Trim("   c  dsa   ")
-		php2go.Dump(a)
-
 		scope.HomePage(ctx)
 	})
 

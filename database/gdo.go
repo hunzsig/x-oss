@@ -6,6 +6,7 @@ import (
 	"database/sql"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/kataras/iris/core/errors"
+	"log"
 	"regexp"
 	"strconv"
 	"strings"
@@ -96,6 +97,23 @@ func (gdo *gdo) Query(query string) (interface{}, error) {
 		if err != nil {
 			return false, err
 		}
+		columns, _ := rows.Columns()
+		length := len(columns)
+		for rows.Next() {
+			value := make([]interface{}, length)
+			columnPointers := make([]interface{}, length)
+			for i:=0;i<length;i++ {
+				columnPointers[i] = &value[i]
+			}
+			rows.Scan(columnPointers...)
+			data := make(map[string]interface{})
+			for i:=0;i<length;i++ {
+				columnName := columns[i]
+				columnValue := columnPointers[i].(*interface{})
+				data[columnName] = *columnValue
+			}
+			log.Print(data)
+		}
 		php2go.Dump(rows)
 	} else if statement == "insert" {
 		result, err := gdo.obj.Exec(query)
@@ -148,10 +166,10 @@ func (gdo *gdo) buildSelectSql() string {
 			sqlStr += " order by " + gdo.options["orderBy"]
 		}
 		if gdo.options["limit"] != "" {
-			sqlStr += " limit" + gdo.options["limit"]
+			sqlStr += " limit " + gdo.options["limit"]
 		}
 		if gdo.options["offset"] != "" {
-			sqlStr += " offset" + gdo.options["offset"]
+			sqlStr += " offset " + gdo.options["offset"]
 		}
 	case mapping.DBType.Pgsql.Value:
 		sqlStr += "select "
