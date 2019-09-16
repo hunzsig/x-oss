@@ -11,12 +11,12 @@ func dsn(conf map[string]string) string {
 	switch conf["type"] {
 	case mapping.DBType.Mysql.Value:
 		dsnString = fmt.Sprintf(
-			"%s:%s@tcp(%s:%s)/%s?parseTime=true",
-			conf["account"], conf["password"], conf["host"], conf["port"], conf["name"])
+			"%s:%s@tcp(%s:%s)/%s?parseTime=True&charset=%s",
+			conf["account"], conf["password"], conf["host"], conf["port"], conf["name"], conf["charset"])
 	case mapping.DBType.Pgsql.Value:
 		dsnString = fmt.Sprintf(
-			"port=%s user=%s password=%s dbname=%s sslmode=disable",
-			conf["port"], conf["account"], conf["password"], conf["name"])
+			"host=%s:%s user=%s password=%s dbname=%s charset=%s sslmode=disable",
+			conf["host"], conf["port"], conf["account"], conf["password"], conf["name"], conf["charset"])
 	case mapping.DBType.Redis.Value:
 		dsnString = fmt.Sprintf("%s:%s", conf["host"], conf["port"])
 	}

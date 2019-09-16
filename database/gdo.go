@@ -3,8 +3,11 @@ package database
 import (
 	"../mapping"
 	"../php2go"
-	"database/sql"
-	_ "github.com/go-sql-driver/mysql"
+	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/mssql"
+	_ "github.com/jinzhu/gorm/dialects/mysql"
+	_ "github.com/jinzhu/gorm/dialects/postgres"
+	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"github.com/kataras/iris/core/errors"
 	"log"
 	"regexp"
@@ -16,7 +19,7 @@ import (
 type gdo struct {
 	dbType  string
 	dsn     string
-	obj     *sql.DB
+	obj     *gorm.DB
 	options map[string]string
 }
 
@@ -32,10 +35,12 @@ func GDO(name string) *gdo {
 	default:
 		panic("not support db type: " + link["type"])
 	}
-	dbObj, err := sql.Open(link["type"], dbDsn)
+	dbObj, err := gorm.Open(link["type"], dbDsn)
 	if err != nil {
 		panic(err)
 	}
+	defer dbObj.Close()
+
 	gdo := new(gdo)
 	gdo.dbType = link["type"]
 	gdo.dsn = dbDsn
@@ -102,12 +107,12 @@ func (gdo *gdo) Query(query string) (interface{}, error) {
 		for rows.Next() {
 			value := make([]interface{}, length)
 			columnPointers := make([]interface{}, length)
-			for i:=0;i<length;i++ {
+			for i := 0; i < length; i++ {
 				columnPointers[i] = &value[i]
 			}
 			rows.Scan(columnPointers...)
 			data := make(map[string]interface{})
-			for i:=0;i<length;i++ {
+			for i := 0; i < length; i++ {
 				columnName := columns[i]
 				columnValue := columnPointers[i].(*interface{})
 				data[columnName] = *columnValue
