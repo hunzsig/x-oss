@@ -17,6 +17,12 @@ func dsn(conf map[string]string) string {
 		dsnString = fmt.Sprintf(
 			"host=%s:%s user=%s password=%s dbname=%s charset=%s sslmode=disable",
 			conf["host"], conf["port"], conf["account"], conf["password"], conf["name"], conf["charset"])
+	case mapping.DBType.Mssql.Value:
+		dsnString = fmt.Sprintf(
+			"sqlserver://%s:%s@%s:%s?database=%s",
+			conf["account"], conf["password"], conf["host"], conf["port"], conf["name"])
+	case mapping.DBType.Sqlite.Value:
+		dsnString = fmt.Sprintf("%s", conf["path"])
 	case mapping.DBType.Redis.Value:
 		dsnString = fmt.Sprintf("%s:%s", conf["host"], conf["port"])
 	}

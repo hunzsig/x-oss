@@ -2,263 +2,74 @@ package database
 
 import (
 	"../mapping"
-	"../php2go"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mssql"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
-	"github.com/kataras/iris/core/errors"
-	"log"
-	"regexp"
-	"strconv"
-	"strings"
 )
 
 // DB 对象
 type gdo struct {
-	dbType  string
-	dsn     string
-	obj     *gorm.DB
-	options map[string]string
+	DbType  string
+	Dsn     string
+	Connect *gorm.DB
+	Options map[string]string
 }
 
 // 连接,并返回一个GDO
 func GDO(name string) *gdo {
 	link := get(name)
 	dbDsn := dsn(link)
+	gormType := ""
 	switch link["type"] {
 	case mapping.DBType.Mysql.Value:
+		gormType = "mysql"
 	case mapping.DBType.Pgsql.Value:
+		gormType = "postgres"
 	case mapping.DBType.Mssql.Value:
+		gormType = "mssql"
 	case mapping.DBType.Sqlite.Value:
+		gormType = "sqlite3"
 	default:
 		panic("not support db type: " + link["type"])
 	}
-	dbObj, err := gorm.Open(link["type"], dbDsn)
+	con, err := gorm.Open(gormType, dbDsn)
 	if err != nil {
 		panic(err)
 	}
-	defer dbObj.Close()
+	// Disable table name's pluralization
+	con.SingularTable(true)
+
+	// link poor
+	con.DB().SetMaxIdleConns(10)
+	con.DB().SetMaxOpenConns(100)
 
 	gdo := new(gdo)
-	gdo.dbType = link["type"]
-	gdo.dsn = dbDsn
-	gdo.obj = dbObj
-	gdo.options = make(map[string]string)
+	gdo.DbType = link["type"]
+	gdo.Dsn = dbDsn
+	gdo.Connect = con
+	gdo.Options = make(map[string]string)
 	return gdo
-}
-
-func Mysql() *gdo {
-	return GDO("mysql")
 }
 
 // ---------------------------------------------
 
-// 处理 key 为对应数据库形式
-func (gdo *gdo) parseKey(key string) string {
-	if key == "" {
-		return key
-	}
-	php2go.Dump(key)
-	key = php2go.Trim(key)
-	if php2go.IsNumeric(key) {
-		return key
-	}
-	php2go.Dump(key)
-	match, err := regexp.MatchString(`[,'"*()`+"`"+`.\s]`, key)
-	if err != nil || match == true {
-		return key
-	}
-	switch gdo.dbType {
-	case mapping.DBType.Mysql.Value:
-		key = "`" + php2go.Trim(key) + "`"
-	case mapping.DBType.Pgsql.Value:
-		fallthrough
-	case mapping.DBType.Mssql.Value:
-		key = "\"" + php2go.Trim(key) + "\""
-	case mapping.DBType.Sqlite.Value:
-		key = "'" + php2go.Trim(key) + "'"
-	}
-	return key
+/**
+ * db type
+ */
+func Mysql() *gdo {
+	return GDO("mysql")
 }
 
-// query
-func (gdo *gdo) Query(query string) (interface{}, error) {
-	php2go.Dump(gdo.options)
-	php2go.Dump(query)
-	queryItems := php2go.Explode(" ", query)
-	if gdo.options["table"] == "" {
-		return false, errors.New("lose table")
-	}
-	statement := strings.ToLower(queryItems[0])
-	//read model,check cache
-	if statement == "select" || statement == "show" {
-		// cache
-	}
-	// 执行新一轮的查询，并释放上一轮结果
-	if statement == "select" || statement == "show" {
-		rows, err := gdo.obj.Query(query)
-		if err != nil {
-			return false, err
-		}
-		columns, _ := rows.Columns()
-		length := len(columns)
-		for rows.Next() {
-			value := make([]interface{}, length)
-			columnPointers := make([]interface{}, length)
-			for i := 0; i < length; i++ {
-				columnPointers[i] = &value[i]
-			}
-			rows.Scan(columnPointers...)
-			data := make(map[string]interface{})
-			for i := 0; i < length; i++ {
-				columnName := columns[i]
-				columnValue := columnPointers[i].(*interface{})
-				data[columnName] = *columnValue
-			}
-			log.Print(data)
-		}
-		php2go.Dump(rows)
-	} else if statement == "insert" {
-		result, err := gdo.obj.Exec(query)
-		if err != nil {
-			return false, err
-		}
-		id, err := result.LastInsertId()
-		if err != nil {
-			return false, err
-		}
-		return id, nil
-	} else if statement == "update" || statement == "delete" {
-		result, err := gdo.obj.Exec(query)
-		if err != nil {
-			return false, err
-		}
-		num, err := result.RowsAffected()
-		if err != nil {
-			return false, err
-		}
-		return num, nil
-	}
-	return true, nil
+func Pgsql() *gdo {
+	return GDO("pgsql")
 }
 
-// 构建 select的sql 串
-func (gdo *gdo) buildSelectSql() string {
-	sqlStr := ""
-	if gdo.obj == nil {
-		return sqlStr
-	}
-	switch gdo.dbType {
-	case mapping.DBType.Mysql.Value:
-		sqlStr += "select " + gdo.options["field"] + " from"
-		if gdo.options["schema"] != "" {
-			sqlStr += " " + gdo.options["schema"] + "." + gdo.options["table"]
-		} else {
-			sqlStr += " " + gdo.options["table"]
-		}
-		if gdo.options["join"] != "" {
-			sqlStr += " " + gdo.options["join"]
-		}
-		if gdo.options["where"] != "" {
-			sqlStr += " where " + gdo.options["where"]
-		}
-		if gdo.options["groupBy"] != "" {
-			sqlStr += " group by " + gdo.options["groupBy"]
-		}
-		if gdo.options["orderBy"] != "" {
-			sqlStr += " order by " + gdo.options["orderBy"]
-		}
-		if gdo.options["limit"] != "" {
-			sqlStr += " limit " + gdo.options["limit"]
-		}
-		if gdo.options["offset"] != "" {
-			sqlStr += " offset " + gdo.options["offset"]
-		}
-	case mapping.DBType.Pgsql.Value:
-		sqlStr += "select "
-	default:
-		panic("select tpl not support type:" + gdo.dbType)
-	}
-	return sqlStr
+func Mssql() *gdo {
+	return GDO("mssql")
 }
 
-// 设置 Schema
-func (gdo *gdo) Schema(val string) *gdo {
-	if gdo.obj != nil {
-		gdo.options["schema"] = gdo.parseKey(val)
-	}
-	return gdo
-}
-
-// 设置 table
-func (gdo *gdo) Table(val string) *gdo {
-	if gdo.obj != nil {
-		gdo.options["table"] = gdo.parseKey(val)
-	}
-	return gdo
-}
-
-// 设置 field
-// 以comma形式分割多个
-func (gdo *gdo) Field(val string, table string) *gdo {
-	if gdo.obj != nil {
-		fieldArr := make([]string, 0)
-		if gdo.options["field"] != "" {
-			fieldArr = php2go.Explode(",", gdo.options["field"])
-		}
-		appendArr := php2go.Explode(",", val)
-		for _, v := range appendArr {
-			if !php2go.InArray(v, fieldArr) {
-				fieldArr = append(fieldArr, gdo.parseKey(table)+"."+gdo.parseKey(v))
-			}
-		}
-		gdo.options["field"] = php2go.Implode(",", fieldArr)
-	}
-	return gdo
-}
-
-// 设置 limit
-func (gdo *gdo) Limit(val int) *gdo {
-	if gdo.obj != nil {
-		gdo.options["limit"] = strconv.Itoa(val)
-	}
-	return gdo
-}
-
-// 设置 offset
-func (gdo *gdo) Offset(val int) *gdo {
-	if gdo.obj != nil {
-		gdo.options["offset"] = strconv.Itoa(val)
-	}
-	return gdo
-}
-
-// get multi
-func (gdo *gdo) Multi() []map[string]string {
-	result := make([]map[string]string, 0)
-	itf, err := gdo.Query(gdo.buildSelectSql())
-	if err != nil {
-		return result
-	}
-	php2go.Dump(itf)
-	return result
-}
-
-// get one
-func (gdo *gdo) One() map[string]string {
-	result := make(map[string]string)
-	gdo.Limit(1)
-	itf, err := gdo.Query(gdo.buildSelectSql())
-	if err != nil {
-		return result
-	}
-	php2go.Dump(itf)
-	return result
-}
-
-// 插入
-func (gdo *gdo) Insert(data map[string]string) {
-
+func Sqlite() *gdo {
+	return GDO("sqlite")
 }

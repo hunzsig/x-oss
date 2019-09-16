@@ -25,7 +25,7 @@ func init() {
 		if err != nil {
 			panic(err)
 		}
-		split := php2go.Explode("\r\n", content)
+		split := php2go.Explode("\n", content)
 		for _, envItem := range split {
 			if len(envItem) > 0 {
 				itemSpilt := strings.Split(envItem, "=")
@@ -38,7 +38,6 @@ func init() {
 				envRawData[itemKey] = itemSpilt[1]
 			}
 		}
-		// Dump(envRawData)
 		Data = new(envReflect)
 		err = build(Data)
 		if err != nil {

@@ -1,12 +1,10 @@
 package models
 
 import (
-	"github.com/jinzhu/gorm"
 	"time"
 )
 
 type Files struct {
-	gorm.Model
 	Hash         string `gorm:"primary_key;type:char(255);not null;unique"` // hash
 	Name         string `gorm:"type:char(255)"`                             // 文件名
 	TokenName    string `gorm:"type:char(255)"`                             // token名

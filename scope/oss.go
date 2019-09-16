@@ -65,10 +65,7 @@ func UploadMulti(ctx iris.Context) bool {
  * 根据token下载文件
  */
 func Download(ctx iris.Context, fileKey string) bool {
-	result, err := database.Mysql().Query("select * from `test`")
-	if err != nil {
-		return response.Error(ctx, err.Error(), nil)
-	}
+	result := database.Mysql().Connect.Table("files").Row()
 	php2go.Dump(result)
 	// token := ctx.Params().Get("token")
 	return response.Download(ctx, "./uploads/test.txt")

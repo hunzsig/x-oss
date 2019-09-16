@@ -2,6 +2,7 @@ package main
 
 import (
 	"./database"
+	"./models"
 	"./php2go"
 	"./scope"
 	"github.com/kataras/iris"
@@ -20,15 +21,14 @@ func route(app *iris.Application) {
 	oss := app.Party("/oss/{token:string}", func(ctx iris.Context) {
 		token := ctx.Params().Get("token")
 		if token != "" {
-			result := database.Mysql().Table("users").Field("*", "users").One()
-			/*
-				if err != nil {
-					response.NotPermission(ctx, "token forbidden", nil)
-				}
-			*/
-			php2go.Dump(result)
-			ctx.Params().Set("user_token", "3")
-			ctx.Params().Set("user_exp", "4")
+			users := models.Users{}
+			database.Mysql().Connect.LogMode(true)
+			res := database.Mysql().Connect.Debug().First(&users)
+			php2go.Dump(res)
+			php2go.Dump(users)
+			// response.NotPermission(ctx, "token forbidden", nil)
+			ctx.Params().Set("user_token", users.Token)
+			// ctx.Params().Set("user_exp", strconv.FormatInt(users.Exp))
 		} else {
 			ctx.Next()
 		}

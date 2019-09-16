@@ -5,6 +5,11 @@
 > 安装依赖
 ```
 go get -u github.com/kataras/iris
+go get -u github.com/go-sql-driver/mysql
+go get -u github.com/lib/pq
+go get -u github.com/denisenkom/go-mssqldb
+go get -u github.com/mattn/go-sqlite3
+go get -u github.com/gomodule/redigo/redis
 go get -u github.com/jinzhu/gorm
 ```
 
@@ -14,7 +19,7 @@ windos
 # go build
 # x-oss.exe
 
-unix
+unix / mac
 # go build
 # ./x-oss
 ```
