@@ -2,6 +2,7 @@ package main
 
 import (
 	"./database"
+	"./mapping"
 	"./models"
 	"./response"
 	"./scope"
@@ -22,8 +23,8 @@ func route(app *iris.Application) {
 		token := ctx.Params().Get("token")
 		if token != "" {
 			users := models.Users{}
-			database.Mysql().Connect.Select("token", "exp").Where("token = ?", token).First(&users)
-			if users.Token == "" || users.Status != "1" {
+			database.Mysql().Connect.Select([]string{"token", "status"}).Where("token = ?", token).First(&users)
+			if users.Token == "" || users.Status != mapping.UserStatus.Enabled.Value {
 				response.NotPermission(ctx, "token forbidden", nil)
 			}
 			ctx.Params().Set("user_token", users.Token)
@@ -36,10 +37,10 @@ func route(app *iris.Application) {
 		// one file which is uploaded
 		oss.Post("/upload/{type:string}", func(ctx iris.Context) {
 			/*
-			todo 此处要判断文件大小数量
-			token := ctx.Params().Get("token")
-			users := models.Users{}
-			database.Mysql().Connect.Select("token", "exp").Where("token = ?", token).First(&users)
+				todo 此处要判断文件大小数量
+				token := ctx.Params().Get("token")
+				users := models.Users{}
+				database.Mysql().Connect.Select("token", "exp").Where("token = ?", token).First(&users)
 			*/
 			uploadType := ctx.Params().Get("type")
 			if uploadType == "multi" {
