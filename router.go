@@ -29,6 +29,7 @@ func route(app *iris.Application) {
 			}
 			ctx.Params().Set("user_token", users.Token)
 			ctx.Params().Set("user_exp", users.Exp)
+			ctx.Next()
 		} else {
 			ctx.Next()
 		}
