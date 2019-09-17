@@ -2,3 +2,5 @@
 .env
 x-oss
 x-oss.exe
+uploads/
+log/

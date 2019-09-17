@@ -27,7 +27,6 @@ func UploadOne(ctx iris.Context) bool {
 	if err != nil {
 		return response.Error(ctx, err.Error(), nil)
 	}
-	defer file.Close()
 	fileInfo, err := oss.AnalysisFile(file, header)
 	if err != nil {
 		return response.Error(ctx, err.Error(), nil)

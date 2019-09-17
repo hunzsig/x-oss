@@ -26,6 +26,7 @@ func route(app *iris.Application) {
 			database.Mysql().Connect.Select([]string{"token", "status"}).Where("token = ?", token).First(&users)
 			if users.Token == "" || users.Status != mapping.UserStatus.Enabled.Value {
 				response.NotPermission(ctx, "token forbidden", nil)
+				return
 			}
 			ctx.Params().Set("user_token", users.Token)
 			ctx.Params().Set("user_exp", users.Exp)

@@ -1,7 +1,19 @@
+DROP TABLE IF EXISTS `log`;
+CREATE TABLE `log`
+(
+    `id`          BIGINT    NOT NULL AUTO_INCREMENT COMMENT 'ID',
+    `user_token`  CHAR(255) NOT NULL COMMENT '用户token',
+    `msg`         VARCHAR(1024) COMMENT '记录信息',
+    `create_time` DATETIME  NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    PRIMARY KEY (`id`)
+) ENGINE = INNODB COMMENT '系统配置';
+
+
 DROP TABLE IF EXISTS `files`;
 CREATE TABLE `files`
 (
     `hash`           CHAR(255)                 NOT NULL COMMENT 'hash',
+    `user_token`     CHAR(255)                 NOT NULL COMMENT '用户token',
     `name`           CHAR(255)                 NOT NULL COMMENT '文件名',
     `token_name`     CHAR(255)                 NOT NULL COMMENT 'token名',
     `suffix`         CHAR(255)                 NOT NULL COMMENT '文件后缀',
@@ -15,9 +27,11 @@ CREATE TABLE `files`
     `create_time`    DATETIME                  NOT NULL COMMENT '创建日期',
     `update_time`    DATETIME                  NOT NULL COMMENT '更新日期',
     PRIMARY KEY (`hash`),
+    INDEX (`user_token`),
     INDEX (`name`),
     INDEX (`content_type`)
 ) ENGINE = INNODB COMMENT '文件表';
+
 
 DROP TABLE IF EXISTS `users`;
 CREATE TABLE `users`
@@ -36,6 +50,7 @@ CREATE TABLE `users`
     INDEX (`level`)
 ) ENGINE = INNODB COMMENT '资源等级参数';
 
+
 DROP TABLE IF EXISTS `setting`;
 CREATE TABLE `setting`
 (
@@ -44,8 +59,16 @@ CREATE TABLE `setting`
     PRIMARY KEY (`key`)
 ) ENGINE = INNODB COMMENT '系统配置';
 
+
+
+INSERT INTO `users` (`token`, `status`, `level`, `exp`, `allow_size_unit`, `allow_size_total`, `allow_size_one`,
+                     `allow_qty`, `allow_suffix`)
+VALUES ('hunzsig', '1', '999', '0', 'TB', '99999', '99999', '99999',
+        ',,,,,mp4,rmvb,mkv,avi,wmv,mov,mpg,3gp,mp3,wma,ape,flac,wav,ogg,m4a,gif,jpeg,jpg,bmp,png,ico,tga,txt,pdf,doc,docx,ppt,pptx,xls,xlsx,csv,psd,rar,7z,zip,iso,cso');
+
 INSERT INTO `setting` (`key`, `data`)
 VALUES ('size_unit', ',,,,,KB,MB,GB,TB');
+
 INSERT INTO `setting` (`key`, `data`)
 VALUES ('file_suffix',
         ',,,,,mp4,rmvb,mkv,avi,wmv,mov,mpg,3gp,mp3,wma,ape,flac,wav,ogg,m4a,gif,jpeg,jpg,bmp,png,ico,tga,txt,pdf,doc,docx,ppt,pptx,xls,xlsx,csv,psd,rar,7z,zip,iso,cso');
