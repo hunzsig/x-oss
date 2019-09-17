@@ -771,6 +771,13 @@ func Sha1FileSrc(src io.Reader) (string, error) {
 	return hex.EncodeToString(hash.Sum(nil)), nil
 }
 
+// Sha1Bytes
+func Sha1Bytes(data []byte) (string, error) {
+	hash := sha1.New()
+	hash.Write([]byte(data))
+	return hex.EncodeToString(hash.Sum(nil)), nil
+}
+
 // Crc32 crc32()
 func Crc32(str string) uint32 {
 	return crc32.ChecksumIEEE([]byte(str))
@@ -1567,6 +1574,15 @@ func Chmod(filename string, mode os.FileMode) bool {
 // Chown chown()
 func Chown(filename string, uid, gid int) bool {
 	return os.Chown(filename, uid, gid) == nil
+}
+
+// FileByte by Src
+func FileByte(src io.Reader) ([]byte, error) {
+	data, err := ioutil.ReadAll(src)
+	if err != nil {
+		return nil, err
+	}
+	return []byte(data), nil
 }
 
 // Fclose fclose()

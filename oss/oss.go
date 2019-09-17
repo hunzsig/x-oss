@@ -3,7 +3,6 @@ package oss
 import (
 	"../models"
 	"../php2go"
-	"io"
 	"mime/multipart"
 	"os"
 	"strconv"
@@ -30,7 +29,10 @@ func AnalysisFile(file multipart.File, header *multipart.FileHeader) (models.Fil
 	fileInfo.Name = php2go.Implode(".", fileNameSep)
 	// 文件大小
 	fileInfo.Size = strconv.FormatInt(header.Size, 10)
-	fileSha1, err := php2go.Sha1FileSrc(file)
+
+	var bytes []byte
+	bytes, err = php2go.FileByte(file)
+	fileSha1, err := php2go.Sha1Bytes(bytes)
 	if err != nil {
 		return fileInfo, err
 	}
@@ -50,6 +52,7 @@ func AnalysisFile(file multipart.File, header *multipart.FileHeader) (models.Fil
 		return fileInfo, err
 	}
 	defer out.Close()
-	io.Copy(out, file)
+	out.Write(bytes)
+	// io.Copy(out, file)
 	return fileInfo, nil
 }
