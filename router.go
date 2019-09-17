@@ -3,7 +3,7 @@ package main
 import (
 	"./database"
 	"./models"
-	"./php2go"
+	"./response"
 	"./scope"
 	"github.com/kataras/iris"
 )
@@ -22,13 +22,12 @@ func route(app *iris.Application) {
 		token := ctx.Params().Get("token")
 		if token != "" {
 			users := models.Users{}
-			database.Mysql().Connect.LogMode(true)
-			res := database.Mysql().Connect.Debug().First(&users)
-			php2go.Dump(res)
-			php2go.Dump(users)
-			// response.NotPermission(ctx, "token forbidden", nil)
+			database.Mysql().Connect.Select("token", "exp").Where("token = ?", token).First(&users)
+			if users.Token == "" || users.Status != "1" {
+				response.NotPermission(ctx, "token forbidden", nil)
+			}
 			ctx.Params().Set("user_token", users.Token)
-			// ctx.Params().Set("user_exp", strconv.FormatInt(users.Exp))
+			ctx.Params().Set("user_exp", users.Exp)
 		} else {
 			ctx.Next()
 		}
@@ -36,6 +35,12 @@ func route(app *iris.Application) {
 	{
 		// one file which is uploaded
 		oss.Post("/upload/{type:string}", func(ctx iris.Context) {
+			/*
+			todo 此处要判断文件大小数量
+			token := ctx.Params().Get("token")
+			users := models.Users{}
+			database.Mysql().Connect.Select("token", "exp").Where("token = ?", token).First(&users)
+			*/
 			uploadType := ctx.Params().Get("type")
 			if uploadType == "multi" {
 				ctx.SetMaxRequestBodySize(multiFileMaxSize + 1<<20)

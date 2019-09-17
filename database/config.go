@@ -57,7 +57,6 @@ func init() {
 	sqlite := make(map[string]string)
 	sqlite["type"] = "sqlite"
 	sqlite["path"] = env.Data.SqlitePath
-	sqlite["charset"] = env.Data.SqliteCharset
 	set("sqlite", sqlite)
 
 	// redis

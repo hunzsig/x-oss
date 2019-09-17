@@ -19,7 +19,7 @@ func dsn(conf map[string]string) string {
 			conf["host"], conf["port"], conf["account"], conf["password"], conf["name"], conf["charset"])
 	case mapping.DBType.Mssql.Value:
 		dsnString = fmt.Sprintf(
-			"sqlserver://%s:%s@%s:%s?database=%s",
+			"sqlserver://%s:%s@%s:%s?database=%s&connection+timeout=10",
 			conf["account"], conf["password"], conf["host"], conf["port"], conf["name"])
 	case mapping.DBType.Sqlite.Value:
 		dsnString = fmt.Sprintf("%s", conf["path"])

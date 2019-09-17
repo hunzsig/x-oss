@@ -25,6 +25,8 @@ func init() {
 		if err != nil {
 			panic(err)
 		}
+		content = php2go.StrReplace("\r\n", "\n", content, -1)
+		content = php2go.StrReplace("\r", "\n", content, -1)
 		split := php2go.Explode("\n", content)
 		for _, envItem := range split {
 			if len(envItem) > 0 {

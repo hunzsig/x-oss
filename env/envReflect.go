@@ -34,5 +34,5 @@ type envReflect struct {
 	MssqlName     string `default:"hunzsig"`
 	MssqlCharset  string `default:"utf8"`
 
-	SqlitePath    string `default:"/tmp/hunzsig.db"`
+	SqlitePath string `default:"/tmp/hunzsig.db"`
 }
