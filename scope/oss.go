@@ -32,7 +32,7 @@ func UploadOne(ctx iris.Context) bool {
 	if err != nil {
 		return response.Error(ctx, err.Error(), nil)
 	}
-	return response.Success(ctx, fileInfo["size"], nil)
+	return response.Success(ctx, fileInfo.Size, nil)
 }
 
 /**

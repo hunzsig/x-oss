@@ -3,6 +3,7 @@ package oss
 import (
 	"../models"
 	"../php2go"
+	"fmt"
 	"io"
 	"mime/multipart"
 	"os"
@@ -38,9 +39,13 @@ func AnalysisFile(file multipart.File, header *multipart.FileHeader) (models.Fil
 	sha1Arr := php2go.Split(fileSha1, 4)
 	// 文件路径
 	fileInfo.Path = "./uploads/" + php2go.Implode("/", sha1Arr) + "/"
+	err = os.MkdirAll(fileInfo.Path, os.ModePerm)
+	if err != nil {
+		fmt.Println(err)
+	}
 	fileInfo.Uri = fileInfo.Path + fileInfo.TokenName + "." + fileInfo.Suffix
 	php2go.Dump(fileInfo)
-	out, err := os.OpenFile(fileInfo.Uri, os.O_WRONLY|os.O_CREATE, 0666)
+	out, err := os.OpenFile(fileInfo.Uri, os.O_WRONLY|os.O_CREATE, os.ModePerm)
 	if err != nil {
 		return fileInfo, err
 	}
