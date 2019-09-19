@@ -2,6 +2,7 @@ package scope
 
 import (
 	"../database"
+	"../models"
 	"../oss"
 	"../php2go"
 	"../response"
@@ -74,6 +75,13 @@ func UploadMulti(ctx iris.Context) bool {
  * 根据token下载文件
  */
 func Download(ctx iris.Context, fileKey string) bool {
+	files := models.Files{}
+	database.Mysql().Connect.Where("name = ?", fileKey).First(&files)
+	if files.Hash == "" {
+		response.NotFound(ctx, "resource not exist", nil)
+		return false
+	}
+
 	result := database.Mysql().Connect.Table("files").Row()
 	php2go.Dump(result)
 	// token := ctx.Params().Get("token")

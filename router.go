@@ -39,7 +39,7 @@ func route(app *iris.Application) {
 		// one file which is uploaded
 		oss.Post("/upload/{type:string}", func(ctx iris.Context) {
 			/*
-				todo 此处要判断文件大小数量
+				todo 此处要判断文件大小/数量等
 				token := ctx.Params().Get("token")
 				users := models.Users{}
 				database.Mysql().Connect.Select("token", "exp").Where("token = ?", token).First(&users)
