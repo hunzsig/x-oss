@@ -21,6 +21,7 @@ func AnalysisFile(file multipart.File, header *multipart.FileHeader) (models.Fil
 		}
 	}
 	defer file.Close()
+	fileInfo.ContentType = header.Header.Get("Content-Type")
 	fileNameSep := php2go.Explode(".", header.Filename)
 	// 后缀名
 	fileInfo.Suffix = fileNameSep[len(fileNameSep)-1]

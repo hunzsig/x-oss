@@ -7,6 +7,7 @@ import (
 	"../response"
 	"github.com/kataras/iris"
 	"os"
+	"time"
 )
 
 func init() {
@@ -31,6 +32,15 @@ func UploadOne(ctx iris.Context) bool {
 	if err != nil {
 		return response.Error(ctx, err.Error(), nil)
 	}
+	// record db
+	fileInfo.UserToken = ctx.Params().Get("user_token")
+	fileInfo.FromUrl = ""
+	fileInfo.CallQty = "0"
+	fileInfo.CallLastTime = time.Now().Format("2006-01-02 15:04:05")
+	fileInfo.CreateTime = time.Now().Format("2006-01-02 15:04:05")
+	fileInfo.UpdateTime = time.Now().Format("2006-01-02 15:04:05")
+	database.Mysql().Connect.Save(&fileInfo)
+	defer database.Mysql().Connect.Close()
 	return response.Success(ctx, fileInfo.Size, nil)
 }
 

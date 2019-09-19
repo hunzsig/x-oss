@@ -2,6 +2,7 @@ package models
 
 type Files struct {
 	Hash         string `gorm:"primary_key;type:char(255);not null;unique"` // hash
+	UserToken    string `gorm:"type:char(255)"`                             // 文件名
 	Name         string `gorm:"type:char(255)"`                             // 文件名
 	TokenName    string `gorm:"type:char(255)"`                             // token名
 	Suffix       string `gorm:"type:char(255)"`                             // 文件后缀
