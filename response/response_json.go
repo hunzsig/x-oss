@@ -1,7 +1,6 @@
 package response
 
 import (
-	"../record"
 	"github.com/kataras/iris"
 )
 
@@ -26,31 +25,26 @@ func Info(ctx iris.Context, msg string, data interface{}) bool {
 }
 
 func Exception(ctx iris.Context, msg string, data interface{}) bool {
-	record.Db(ctx, msg)
 	Json(ctx, CodeException, msg, data)
 	return false
 }
 
 func Error(ctx iris.Context, msg string, data interface{}) bool {
-	record.Db(ctx, msg)
 	Json(ctx, CodeError, msg, data)
 	return false
 }
 
 func NotPermission(ctx iris.Context, msg string, data interface{}) bool {
-	record.Db(ctx, msg)
 	Json(ctx, CodeNotPermission, msg, data)
 	return false
 }
 
 func NotFound(ctx iris.Context, msg string, data interface{}) bool {
-	record.Db(ctx, msg)
 	Json(ctx, CodeNotFound, msg, data)
 	return false
 }
 
 func Abort(ctx iris.Context, msg string, data interface{}) bool {
-	record.Db(ctx, msg)
 	Json(ctx, CodeAbort, msg, data)
 	return false
 }

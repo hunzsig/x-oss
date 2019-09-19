@@ -7,6 +7,7 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	_ "github.com/jinzhu/gorm/dialects/sqlite"
+	"time"
 )
 
 // DB 对象
@@ -42,8 +43,14 @@ func GDO(name string) *gdo {
 	con.SingularTable(true)
 
 	// link poor
+	// SetMaxIdleConns sets the maximum number of connections in the idle connection pool.
 	con.DB().SetMaxIdleConns(10)
+
+	// SetMaxOpenConns sets the maximum number of open connections to the database.
 	con.DB().SetMaxOpenConns(100)
+
+	// SetConnMaxLifetime sets the maximum amount of time a connection may be reused.
+	con.DB().SetConnMaxLifetime(time.Hour)
 
 	gdo := new(gdo)
 	gdo.DbType = link["type"]
