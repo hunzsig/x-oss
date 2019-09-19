@@ -76,14 +76,18 @@ func UploadMulti(ctx iris.Context) bool {
  */
 func Download(ctx iris.Context, fileKey string) bool {
 	files := models.Files{}
-	database.Mysql().Connect.Where("name = ?", fileKey).First(&files)
+	database.Mysql().Connect.Where("hash = ?", fileKey).First(&files)
 	if files.Hash == "" {
+		response.NotFound(ctx, "resource not found", nil)
+		return false
+	}
+	if files.Uri == "" {
+		response.NotFound(ctx, "resource has a bad uri", nil)
+		return false
+	}
+	if oss.IsExist(files.Uri) == false {
 		response.NotFound(ctx, "resource not exist", nil)
 		return false
 	}
-
-	result := database.Mysql().Connect.Table("files").Row()
-	php2go.Dump(result)
-	// token := ctx.Params().Get("token")
-	return response.Download(ctx, "./uploads/test.txt")
+	return response.Download(ctx, files.Uri)
 }

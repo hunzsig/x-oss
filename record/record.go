@@ -16,7 +16,7 @@ import (
 func Db(ctx iris.Context, message string) bool {
 	token := ctx.Params().Get("user_token")
 	if token == "" {
-		token = ctx.Params().Get("token")
+		token = "unknow"
 	}
 	log := models.Log{
 		UserToken:  token,
