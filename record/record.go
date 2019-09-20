@@ -3,12 +3,22 @@ package record
 import (
 	"../database"
 	"../models"
+	"../php2go"
 	"encoding/json"
 	"fmt"
 	"github.com/kataras/iris"
 	"os"
 	"time"
 )
+
+func init() {
+	if php2go.IsDir("./logs") == false {
+		err := php2go.Mkdir("logs", os.ModeDir)
+		if err != nil {
+			panic(err)
+		}
+	}
+}
 
 /**
  * 数据库记录

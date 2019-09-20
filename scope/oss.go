@@ -95,3 +95,4 @@ func Download(ctx iris.Context, fileKey string) bool {
 	}
 	return response.Download(ctx, files.Uri)
 }
+
