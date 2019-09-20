@@ -42,7 +42,11 @@ func UploadOne(ctx iris.Context) bool {
 	fileInfo.UpdateTime = time.Now().Format("2006-01-02 15:04:05")
 	database.Mysql().Connect.Save(&fileInfo)
 	defer database.Mysql().Connect.Close()
-	return response.Success(ctx, fileInfo.Size, nil)
+	returnData := make(map[string]string)
+	returnData["key"] = fileInfo.Key
+	returnData["size"] = fileInfo.Size
+	returnData["name"] = fileInfo.Name
+	return response.Success(ctx, "upload_ok", returnData)
 }
 
 /**
@@ -76,7 +80,7 @@ func UploadMulti(ctx iris.Context) bool {
  */
 func Download(ctx iris.Context, fileKey string) bool {
 	files := models.Files{}
-	database.Mysql().Connect.Where("hash = ?", fileKey).First(&files)
+	database.Mysql().Connect.Where("`key` = ?", fileKey).First(&files)
 	if files.Hash == "" {
 		response.NotFound(ctx, "resource not found", nil)
 		return false
@@ -91,3 +95,4 @@ func Download(ctx iris.Context, fileKey string) bool {
 	}
 	return response.Download(ctx, files.Uri)
 }
+

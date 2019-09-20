@@ -54,9 +54,20 @@ func route(app *iris.Application) {
 			}
 		})
 
-		// download file by token
+		// download file by key
 		oss.Get("/download/{fileKey:string}", func(ctx iris.Context) {
 			scope.Download(ctx, ctx.Params().Get("fileKey"))
+		})
+
+		// get files info
+		oss.Get("/file", func(ctx iris.Context) {
+			files := scope.FilesInfo(ctx)
+			response.Success(ctx, "ok", files)
+		})
+		// get files list
+		oss.Get("/files", func(ctx iris.Context) {
+			files := scope.FilesList(ctx)
+			response.Success(ctx, "ok", files)
 		})
 	}
 }
