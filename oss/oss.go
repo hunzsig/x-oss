@@ -1,6 +1,7 @@
 package oss
 
 import (
+	"../database"
 	"../models"
 	"../php2go"
 	"mime/multipart"
@@ -35,6 +36,8 @@ func AnalysisFile(file multipart.File, header *multipart.FileHeader) (models.Fil
 		}
 	}
 	defer file.Close()
+
+	// Content-Type
 	fileInfo.ContentType = header.Header.Get("Content-Type")
 	fileNameSep := php2go.Explode(".", header.Filename)
 	// 后缀名
@@ -51,17 +54,28 @@ func AnalysisFile(file multipart.File, header *multipart.FileHeader) (models.Fil
 	if err != nil {
 		return fileInfo, err
 	}
+	// 判断sha1是否已存在，已存在则获取数据返回
+	fileInfoOld := models.Files{}
+	database.Mysql().Connect.Where("hash = ?", fileSha1).First(&fileInfoOld)
+	if fileInfoOld.Hash == fileSha1 {
+		return fileInfoOld, nil
+	}
+
+	// md5名称
+	fileInfo.Md5Name = php2go.Md5(fileSha1)
+	// key
+	fileInfo.Key = fileSha1
+	// hash
 	fileInfo.Hash = fileSha1
-	sha1Arr := php2go.Split(fileSha1, 4)
-	// token名
-	fileInfo.TokenName = php2go.Md5(fileSha1)
 	// 文件路径
+	sha1Arr := php2go.Split(fileSha1, 4)
 	fileInfo.Path = "./uploads/" + php2go.Implode("/", sha1Arr) + "/"
 	err = os.MkdirAll(fileInfo.Path, os.ModePerm)
 	if err != nil {
 		return fileInfo, err
 	}
-	fileInfo.Uri = fileInfo.Path + fileInfo.TokenName + "." + fileInfo.Suffix
+	// uri
+	fileInfo.Uri = fileInfo.Path + fileInfo.Md5Name + "." + fileInfo.Suffix
 	out, err := os.OpenFile(fileInfo.Uri, os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
 		return fileInfo, err
