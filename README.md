@@ -13,6 +13,13 @@ go get -u github.com/gomodule/redigo/redis
 go get -u github.com/jinzhu/gorm
 ```
 
+> mac 版本不对应
+(如compile: version "go1.12" does not match go tool version "go1.13")，
+可以敲句
+```
+export GOROOT=/usr/local/opt/go/libexec
+```
+
 > 构建/执行项目
 ```
 windos
