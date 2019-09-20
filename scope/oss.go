@@ -80,7 +80,7 @@ func UploadMulti(ctx iris.Context) bool {
  */
 func Download(ctx iris.Context, fileKey string) bool {
 	files := models.Files{}
-	database.Mysql().Connect.Where("key = ?", fileKey).First(&files)
+	database.Mysql().Connect.Where("`key` = ?", fileKey).First(&files)
 	if files.Hash == "" {
 		response.NotFound(ctx, "resource not found", nil)
 		return false
