@@ -4,9 +4,11 @@ import (
 	"../database"
 	"../models"
 	"../php2go"
+	"github.com/kataras/iris"
 	"mime/multipart"
 	"os"
 	"strconv"
+	"time"
 )
 
 /**
@@ -26,7 +28,7 @@ func IsExist(path string) bool {
 /**
  * 分析文件，并返回文件信息
  */
-func AnalysisFile(file multipart.File, header *multipart.FileHeader) (models.Files, error) {
+func AnalysisFile(ctx iris.Context, file multipart.File, header *multipart.FileHeader) (models.Files, error) {
 	fileInfo := models.Files{}
 	var err error
 	if file == nil {
@@ -50,32 +52,54 @@ func AnalysisFile(file multipart.File, header *multipart.FileHeader) (models.Fil
 
 	var bytes []byte
 	bytes, err = php2go.FileByte(file)
+	fileMd5, err := php2go.Md5Bytes(bytes)
+	if err != nil {
+		return fileInfo, err
+	}
 	fileSha1, err := php2go.Sha1Bytes(bytes)
 	if err != nil {
 		return fileInfo, err
 	}
-	// 判断sha1是否已存在，已存在则获取数据返回
-	fileInfoOld := models.Files{}
-	database.Mysql().Connect.Where("hash = ?", fileSha1).First(&fileInfoOld)
-	if fileInfoOld.Hash == fileSha1 {
-		return fileInfoOld, nil
-	}
+	fileHash := fileSha1 + fileMd5
 
 	// md5名称
-	fileInfo.Md5Name = php2go.Md5(fileSha1)
+	fileInfo.Md5Name = php2go.Md5(fileMd5)
 	// key
-	fileInfo.Key = fileSha1
+	fileInfo.Key = fileHash
 	// hash
-	fileInfo.Hash = fileSha1
+	fileInfo.Hash = fileHash
 	// 文件路径
-	sha1Arr := php2go.Split(fileSha1, 4)
-	fileInfo.Path = "./uploads/" + php2go.Implode("/", sha1Arr) + "/"
+	now := time.Now().Format("2006-01-02 15:04:05")
+	ymd := time.Now().Format("2006-01-02")
+	min := time.Now().Format("15")
+	fileInfo.Path = "./uploads/" + ymd + "/" + min + "/"
+	fileInfo.Uri = fileInfo.Path + fileInfo.Md5Name + "." + fileInfo.Suffix
 	err = os.MkdirAll(fileInfo.Path, os.ModePerm)
 	if err != nil {
 		return fileInfo, err
 	}
-	// uri
-	fileInfo.Uri = fileInfo.Path + fileInfo.Md5Name + "." + fileInfo.Suffix
+
+	// 判断表中 hash 是否已存在，已存在则获取数据返回
+	fileInfoOld := models.Files{}
+	database.Mysql().Connect.Where("hash = ?", fileHash).First(&fileInfoOld)
+	if fileInfoOld.Hash == fileHash {
+		// 文件已落盘则返回信息
+		if php2go.IsFile(fileInfo.Uri) == true {
+			return fileInfoOld, nil
+		}
+	} else {
+		// record db
+		fileInfo.UserToken = ctx.Params().Get("user_token")
+		fileInfo.FromUrl = ""
+		fileInfo.CallQty = "0"
+		fileInfo.CallLastTime = now
+		fileInfo.CreateTime = now
+		fileInfo.UpdateTime = now
+		database.Mysql().Connect.Save(&fileInfo)
+		defer database.Mysql().Connect.Close()
+	}
+
+	// 保存文件
 	out, err := os.OpenFile(fileInfo.Uri, os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
 		return fileInfo, err
@@ -83,5 +107,6 @@ func AnalysisFile(file multipart.File, header *multipart.FileHeader) (models.Fil
 	defer out.Close()
 	out.Write(bytes)
 	// io.Copy(out, file)
+
 	return fileInfo, nil
 }

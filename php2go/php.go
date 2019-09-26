@@ -742,6 +742,13 @@ func Md5FileSrc(src io.Reader) (string, error) {
 	return hex.EncodeToString(hash.Sum(nil)), nil
 }
 
+// Md5Bytes
+func Md5Bytes(data []byte) (string, error) {
+	hash := md5.New()
+	hash.Write([]byte(data))
+	return hex.EncodeToString(hash.Sum(nil)), nil
+}
+
 // Sha1 sha1()
 func Sha1(str string) string {
 	hash := sha1.New()
