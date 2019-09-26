@@ -83,10 +83,7 @@ func AnalysisFile(ctx iris.Context, file multipart.File, header *multipart.FileH
 	fileInfoOld := models.Files{}
 	database.Mysql().Connect.Where("hash = ?", fileHash).First(&fileInfoOld)
 	if fileInfoOld.Hash == fileHash {
-		// 文件已落盘则返回信息
-		if php2go.IsFile(fileInfo.Uri) == true {
-			return fileInfoOld, nil
-		}
+		return fileInfoOld, nil
 	} else {
 		// record db
 		fileInfo.UserToken = ctx.Params().Get("user_token")

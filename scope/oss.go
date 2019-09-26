@@ -6,6 +6,7 @@ import (
 	"../oss"
 	"../php2go"
 	"../response"
+	"fmt"
 	"github.com/kataras/iris"
 	"os"
 )
@@ -48,24 +49,32 @@ func UploadOne(ctx iris.Context) bool {
 func UploadMulti(ctx iris.Context) bool {
 	//获取通过iris.WithPostMaxMemory获取的最大上传值大小。
 	maxSize := ctx.Application().ConfigurationReadOnly().GetPostMaxMemory()
+	fmt.Println(maxSize)
 	err := ctx.Request().ParseMultipartForm(maxSize)
 	if err != nil {
-		ctx.StatusCode(iris.StatusInternalServerError)
-		ctx.WriteString(err.Error())
+		return response.Error(ctx, err.Error(), nil)
 	}
-	/*
-		form := ctx.Request().MultipartForm
-		files := form.File["files[]"]
-		failures := 0
-		for _, file := range files {
-			_, err = saveUploadedFile(file, "./uploads")
-			if err != nil {
-				failures++
-				ctx.Writef("failed to upload: %s\n", file.Filename)
-			}
+	form := ctx.Request().MultipartForm
+	files := form.File["files[]"]
+	success := 0
+	failures := 0
+	var returnData []map[string]string
+	for _, file := range files {
+		fileInfo, err := oss.AnalysisFile(ctx, nil, file)
+		if err != nil {
+			failures++
+			returnData = append(returnData, nil)
+		} else {
+			success++
+			item := make(map[string]string)
+			item["key"] = fileInfo.Key
+			item["size"] = fileInfo.Size
+			item["name"] = fileInfo.Name
+			item["suffix"] = fileInfo.Suffix
+			returnData = append(returnData, item)
 		}
-	*/
-	return true
+	}
+	return response.Success(ctx, "upload_ok", returnData)
 }
 
 /**
@@ -88,4 +97,3 @@ func Download(ctx iris.Context, fileKey string) bool {
 	}
 	return response.Download(ctx, files.Uri)
 }
-
