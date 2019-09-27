@@ -8,6 +8,7 @@ import (
 	"mime/multipart"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -40,7 +41,7 @@ func AnalysisFile(ctx iris.Context, file multipart.File, header *multipart.FileH
 	defer file.Close()
 
 	// Content-Type
-	fileInfo.ContentType = header.Header.Get("Content-Type")
+	fileInfo.ContentType = strings.ToLower(header.Header.Get("Content-Type"))
 	fileNameSep := php2go.Explode(".", header.Filename)
 	// 后缀名
 	fileInfo.Suffix = fileNameSep[len(fileNameSep)-1]

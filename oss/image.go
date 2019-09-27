@@ -16,7 +16,7 @@ import (
 /**
  * 图片编码
  */
-func Encode(inputName string, file *os.File, rgba *image.RGBA) error {
+func ImageEncode(inputName string, file *os.File, rgba *image.RGBA) error {
 	var err error
 	if strings.HasSuffix(inputName, "jpg") || strings.HasSuffix(inputName, "jpeg") {
 		err = jpeg.Encode(file, rgba, nil)
@@ -55,9 +55,6 @@ func ImageColorReverse(source string) *image.RGBA {
 			newRgba.SetRGBA(i, j, color.RGBA{R: rUint8, G: gUint8, B: bUint8, A: aUint8})
 		}
 	}
-	f, _ := os.Create(target)
-	defer f.Close()
-	encode(source, f, newRgba)
 	return newRgba
 }
 

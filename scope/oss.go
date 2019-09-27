@@ -9,6 +9,9 @@ import (
 	"fmt"
 	"github.com/kataras/iris"
 	"os"
+	"strconv"
+	"strings"
+	"time"
 )
 
 func init() {
@@ -81,19 +84,52 @@ func UploadMulti(ctx iris.Context) bool {
  * 根据token下载文件
  */
 func Download(ctx iris.Context, fileKey string) bool {
-	files := models.Files{}
-	database.Mysql().Connect.Where("`key` = ?", fileKey).First(&files)
-	if files.Hash == "" {
+	fileInfo := models.Files{}
+	database.Mysql().Connect.Where("`key` = ?", fileKey).First(&fileInfo)
+	if fileInfo.Hash == "" {
 		response.NotFound(ctx, "resource not found", nil)
 		return false
 	}
-	if files.Uri == "" {
+	if fileInfo.Uri == "" {
 		response.NotFound(ctx, "resource has a bad uri", nil)
 		return false
 	}
-	if oss.IsExist(files.Uri) == false {
+	if oss.IsExist(fileInfo.Uri) == false {
 		response.NotFound(ctx, "resource not exist", nil)
 		return false
 	}
-	return response.Download(ctx, files.Uri)
+
+	// 更新调用
+	callQTY, _ := strconv.Atoi(fileInfo.CallQty)
+	fileInfo.CallQty = strconv.Itoa(callQTY + 1)
+	database.Mysql().Connect.Table("files").Where("`hash` = ?", fileInfo.Hash).Updates(models.Files{
+		CallQty:      strconv.Itoa(callQTY + 1),
+		CallLastTime: time.Now().Format("2006-01-02 15:04:05"),
+	})
+
+	fmt.Println(strings.Index(fileInfo.ContentType, "image"))
+
+	// 图片处理
+	if strings.Index(fileInfo.ContentType, "image") >= 0 {
+		tempPath := "./temp/"
+		tempUri := tempPath + "/" + fileInfo.Hash + "." + fileInfo.Suffix
+		err := os.MkdirAll(tempPath, os.ModePerm)
+		if err != nil {
+			response.Error(ctx, err.Error(), nil)
+			return false
+		}
+		f, _ := os.Create(tempUri)
+		defer f.Close()
+		defer deleteFile()
+		defer os.Remove(tempUri)
+		err = oss.ImageEncode(tempUri, f, oss.ImageColorReverse(fileInfo.Uri))
+		if err != nil {
+			response.Error(ctx, err.Error(), nil)
+			return false
+		}
+		return response.Download(ctx, tempUri)
+	}
+	php2go.Dump(fileInfo)
+	// 原库中文件
+	return response.Download(ctx, fileInfo.Uri)
 }
