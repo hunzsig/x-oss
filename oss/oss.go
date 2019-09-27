@@ -74,10 +74,6 @@ func AnalysisFile(ctx iris.Context, file multipart.File, header *multipart.FileH
 	min := time.Now().Format("15")
 	fileInfo.Path = "./uploads/" + ymd + "/" + min + "/"
 	fileInfo.Uri = fileInfo.Path + fileInfo.Md5Name + "." + fileInfo.Suffix
-	err = os.MkdirAll(fileInfo.Path, os.ModePerm)
-	if err != nil {
-		return fileInfo, err
-	}
 
 	// 判断表中 hash 是否已存在，已存在则获取数据返回
 	fileInfoOld := models.Files{}
@@ -97,6 +93,10 @@ func AnalysisFile(ctx iris.Context, file multipart.File, header *multipart.FileH
 	}
 
 	// 保存文件
+	err = os.MkdirAll(fileInfo.Path, os.ModePerm)
+	if err != nil {
+		return fileInfo, err
+	}
 	out, err := os.OpenFile(fileInfo.Uri, os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
 		return fileInfo, err
