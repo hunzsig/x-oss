@@ -15,9 +15,19 @@ go get -u github.com/jinzhu/gorm
 
 > mac 版本不对应
 (如compile: version "go1.12" does not match go tool version "go1.13")，
-可以敲句
+这是由于你的go版本与工具不对应造成的，如果是全局环境不对可以敲句
+
+> 如果是IDE内部终端报错，去「设置」查看GOROOT是否选择了正确的GO sdk
+
 ```
 export GOROOT=/usr/local/opt/go/libexec
+```
+
+> cannot find package "golang.org/x/crypto/md4" 问题,由于golang.org被强，无法直接go get获得
+```
+进入你的GOPATH
+git clone https://github.com/golang/crypto.git golang.org/x/crypto
+其中golang.org/x/crypto是对应存放的目录，根据本地目录自行调整结构
 ```
 
 > 构建/执行项目
