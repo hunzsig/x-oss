@@ -108,6 +108,7 @@ func Download(ctx iris.Context) bool {
 
 		// 检测form values
 		var imagesChange []string
+
 		// 灰度
 		colorGrayscale := ctx.FormValue("cg")
 		if colorGrayscale == "1" {
