@@ -2,7 +2,9 @@ package oss
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/kataras/iris/core/errors"
+	"graphics"
 	"image"
 	"image/color"
 	"image/gif"
@@ -76,4 +78,49 @@ func ImageColorGrayscale(m image.Image) *image.RGBA {
 		}
 	}
 	return newRgba
+}
+
+/**
+ * 图片缩放
+ */
+func ImageResize(m image.Image, newdx int) *image.RGBA {
+	bounds := m.Bounds()
+	dx := bounds.Dx()
+	dy := bounds.Dy()
+	newRgba := image.NewRGBA(image.Rect(0, 0, newdx, newdx*dy/dx))
+	graphics.Scale(newRgba, m)
+	return newRgba
+}
+
+/**
+ * 图片转为字符画（简易版）
+ */
+func ImageAscll(m image.Image, target string) {
+	if m.Bounds().Dx() > 300 {
+		m = rectImage(m, 300)
+	}
+	bounds := m.Bounds()
+	dx := bounds.Dx()
+	dy := bounds.Dy()
+	arr := []string{"M", "N", "H", "Q", "$", "O", "C", "?", "7", ">", "!", ":", "–", ";", "."}
+
+	fileName := target
+	dstFile, err := os.Create(fileName)
+	if err != nil {
+		fmt.Println(err.Error())
+		return
+	}
+	defer dstFile.Close()
+	for i := 0; i < dy; i++ {
+		for j := 0; j < dx; j++ {
+			colorRgb := m.At(j, i)
+			_, g, _, _ := colorRgb.RGBA()
+			avg := uint8(g >> 8)
+			num := avg / 18
+			dstFile.WriteString(arr[num])
+			if j == dx-1 {
+				dstFile.WriteString("\n")
+			}
+		}
+	}
 }

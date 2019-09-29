@@ -120,7 +120,6 @@ func Download(ctx iris.Context, fileKey string) bool {
 		}
 		f, _ := os.Create(tempUri)
 		defer f.Close()
-		defer deleteFile()
 		defer os.Remove(tempUri)
 		err = oss.ImageEncode(tempUri, f, oss.ImageColorReverse(fileInfo.Uri))
 		if err != nil {
