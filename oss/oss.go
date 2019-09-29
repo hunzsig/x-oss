@@ -12,6 +12,8 @@ import (
 	"time"
 )
 
+const UploadsRoot = "./my_data/uploads/"
+
 /**
  * 判断所给路径文件/文件夹是否存在
  */
@@ -73,7 +75,7 @@ func AnalysisFile(ctx iris.Context, file multipart.File, header *multipart.FileH
 	now := time.Now().Format("2006-01-02 15:04:05")
 	ymd := time.Now().Format("2006-01-02")
 	min := time.Now().Format("15")
-	fileInfo.Path = "./uploads/" + ymd + "/" + min + "/"
+	fileInfo.Path = UploadsRoot + ymd + "/" + min + "/"
 	fileInfo.Uri = fileInfo.Path + fileInfo.Md5Name + "." + fileInfo.Suffix
 
 	// 判断表中 hash 是否已存在，已存在则获取数据返回

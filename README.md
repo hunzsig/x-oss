@@ -11,7 +11,7 @@ go get -u github.com/denisenkom/go-mssqldb # need golang.org/x/crypto/md4
 go get -u github.com/mattn/go-sqlite3   // 需要 gcc++
 go get -u github.com/gomodule/redigo/redis
 go get -u github.com/jinzhu/gorm
-go get code.google.com/p/graphics-go/graphics // 需要梯子
+go get -u github.com/hunzsig/graphics
 ```
 
 > mac 版本不对应

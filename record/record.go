@@ -10,6 +10,7 @@ import (
 	"time"
 )
 
+const RecordsRoot = "./my_data/records/"
 
 /**
  * 数据库记录
@@ -43,7 +44,7 @@ func File(ctx iris.Context, message string) bool {
 		Msg:       message,
 	}
 	jsonBytes, _ := json.Marshal(log)
-	path := "./logs/" + token + "/"
+	path := RecordsRoot + token + "/"
 	os.MkdirAll(path, os.ModePerm)
 	uri := path + time.Now().Format("20060102150405") + ".log"
 	out, _ := os.OpenFile(uri, os.O_WRONLY|os.O_CREATE, 0666)

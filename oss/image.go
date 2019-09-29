@@ -3,8 +3,8 @@ package oss
 import (
 	"bytes"
 	"fmt"
+	"github.com/hunzsig/graphics"
 	"github.com/kataras/iris/core/errors"
-	"graphics"
 	"image"
 	"image/color"
 	"image/gif"
@@ -97,7 +97,7 @@ func ImageResize(m image.Image, newdx int) *image.RGBA {
  */
 func ImageAscll(m image.Image, target string) {
 	if m.Bounds().Dx() > 300 {
-		m = rectImage(m, 300)
+		m = ImageResize(m, 300)
 	}
 	bounds := m.Bounds()
 	dx := bounds.Dx()
