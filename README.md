@@ -15,10 +15,11 @@ go get -u github.com/jinzhu/gorm
 
 > mac 版本不对应
 (如compile: version "go1.12" does not match go tool version "go1.13")，
-这是由于你的go版本与工具不对应造成的，如果是全局环境不对可以敲句
+这是由于你的go版本与工具不对应造成的
 
 > 如果是IDE内部终端报错，去「设置」查看GOROOT是否选择了正确的GO sdk
 
+> 如果是全局环境不对可以敲句
 ```
 export GOROOT=/usr/local/opt/go/libexec
 ```
