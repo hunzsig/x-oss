@@ -56,7 +56,7 @@ func route(app *iris.Application) {
 
 		// download file by key
 		oss.Get("/download/{fileKey:string}", func(ctx iris.Context) {
-			scope.Download(ctx, ctx.Params().Get("fileKey"))
+			scope.Download(ctx)
 		})
 
 		// get files info

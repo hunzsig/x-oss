@@ -2,5 +2,4 @@
 .env
 x-oss
 x-oss.exe
-uploads/
-logs/
+my_data/

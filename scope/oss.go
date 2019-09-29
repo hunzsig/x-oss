@@ -14,14 +14,7 @@ import (
 	"time"
 )
 
-func init() {
-	if php2go.IsDir("./uploads") == false {
-		err := php2go.Mkdir("uploads", os.ModeDir)
-		if err != nil {
-			panic(err)
-		}
-	}
-}
+const tempImagesRoot = "./my_data/temp_images"
 
 /**
  * 上传文件（一个）
@@ -83,7 +76,8 @@ func UploadMulti(ctx iris.Context) bool {
 /**
  * 根据token下载文件
  */
-func Download(ctx iris.Context, fileKey string) bool {
+func Download(ctx iris.Context) bool {
+	fileKey := ctx.Params().Get("fileKey")
 	fileInfo := models.Files{}
 	database.Mysql().Connect.Where("`key` = ?", fileKey).First(&fileInfo)
 	if fileInfo.Hash == "" {
@@ -111,16 +105,29 @@ func Download(ctx iris.Context, fileKey string) bool {
 
 	// 图片处理
 	if strings.Index(fileInfo.ContentType, "image") >= 0 {
-		tempPath := "./temp/"
-		tempUri := tempPath + "/" + fileInfo.Hash + "." + fileInfo.Suffix
-		err := os.MkdirAll(tempPath, os.ModePerm)
+
+		// 检测form values
+		var imagesChange []string
+		// 灰度
+		colorGrayscale := ctx.FormValue("cg")
+		if colorGrayscale == "1" {
+			imagesChange = append(imagesChange, "cg")
+		}
+		// 反转
+		colorReverse := ctx.FormValue("cr")
+		if colorReverse == "1" {
+			imagesChange = append(imagesChange, "cr")
+		}
+
+		imagesChangeStr := "_" + php2go.Implode("_", imagesChange)
+		tempUri := tempImagesRoot + "/" + fileInfo.Hash + imagesChangeStr + "." + fileInfo.Suffix
+		err := os.MkdirAll(tempImagesRoot, os.ModePerm)
 		if err != nil {
 			response.Error(ctx, err.Error(), nil)
 			return false
 		}
 		f, _ := os.Create(tempUri)
 		defer f.Close()
-		defer os.Remove(tempUri)
 		err = oss.ImageEncode(tempUri, f, oss.ImageColorReverse(fileInfo.Uri))
 		if err != nil {
 			response.Error(ctx, err.Error(), nil)
