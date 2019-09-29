@@ -109,13 +109,15 @@ func Download(ctx iris.Context) bool {
 		// 检测form values
 		var imagesChange []string
 
-		// 灰度
+		// get value
 		colorGrayscale := ctx.FormValue("cg")
+		colorReverse := ctx.FormValue("cr")
+
+		// 灰度
 		if colorGrayscale == "1" {
 			imagesChange = append(imagesChange, "cg")
 		}
 		// 反转
-		colorReverse := ctx.FormValue("cr")
 		if colorReverse == "1" {
 			imagesChange = append(imagesChange, "cr")
 		}
