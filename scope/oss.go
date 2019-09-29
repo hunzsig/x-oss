@@ -110,9 +110,15 @@ func Download(ctx iris.Context) bool {
 		var imagesChange []string
 
 		// get value
+		resize := ctx.FormValue("rs")
 		colorGrayscale := ctx.FormValue("cg")
 		colorReverse := ctx.FormValue("cr")
 
+		// 缩放
+		if resize != "" {
+			rs :=
+			imagesChange = append(imagesChange, "cg")
+		}
 		// 灰度
 		if colorGrayscale == "1" {
 			imagesChange = append(imagesChange, "cg")
@@ -121,6 +127,7 @@ func Download(ctx iris.Context) bool {
 		if colorReverse == "1" {
 			imagesChange = append(imagesChange, "cr")
 		}
+
 
 		imagesChangeStr := "_" + php2go.Implode("_", imagesChange)
 		tempUri := tempImagesRoot + "/" + fileInfo.Hash + imagesChangeStr + "." + fileInfo.Suffix

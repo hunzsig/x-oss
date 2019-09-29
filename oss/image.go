@@ -33,12 +33,19 @@ func ImageEncode(inputName string, file *os.File, rgba *image.RGBA) error {
 }
 
 /**
- * 图片色彩反转
+ * 获取图片source
  */
-func ImageColorReverse(source string) *image.RGBA {
+func ImageFetch(source string) image.Image {
 	ff, _ := ioutil.ReadFile(source)
 	bbb := bytes.NewBuffer(ff)
 	m, _, _ := image.Decode(bbb)
+	return m
+}
+
+/**
+ * 图片色彩反转
+ */
+func ImageColorReverse(m image.Image) *image.RGBA {
 	bounds := m.Bounds()
 	dx := bounds.Dx()
 	dy := bounds.Dy()
