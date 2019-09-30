@@ -106,6 +106,7 @@ func Download(ctx iris.Context) bool {
 		var imagesChange []string
 
 		// get value
+		thumb := ctx.FormValue("thumb")
 		resize := ctx.FormValue("resize")
 		rotate := ctx.FormValue("rotate")
 		blur := ctx.FormValue("blur")
@@ -129,6 +130,52 @@ func Download(ctx iris.Context) bool {
 		resizeI := false
 		resizeF := false
 
+		// 裁剪
+		if thumb != "" {
+			resizeSplit := php2go.Explode(",", resize)
+			if len(resizeSplit) != 4 {
+				response.Error(ctx, "thumb has four vector", nil)
+				return false
+			}
+			for idx, v := range resizeSplit {
+				if v != "" {
+					resizeSplit[idx] = php2go.Trim(v, " ")
+				}
+			}
+
+			if php2go.Strpos(resizeSplit[0], "%", 0) > -1 { // 百分比形式时
+				resizeSplit[0] = php2go.StrReplace("%", "", resizeSplit[0], -1)
+				resizeSplit[1] = php2go.StrReplace("%", "", resizeSplit[1], -1)
+				resizeFx, _ = strconv.ParseFloat(resizeSplit[0], 2)
+				resizeFy, _ = strconv.ParseFloat(resizeSplit[1], 2)
+				resizeFx = resizeFx * 0.01
+				resizeFy = resizeFy * 0.01
+				imagesChange = append(
+					imagesChange,
+					"rs",
+					strconv.FormatFloat(resizeFx, 'f', 2, 64),
+					strconv.FormatFloat(resizeFy, 'f', 2, 64),
+				)
+				resizeF = true
+			} else {
+				resizeFx, _ = strconv.ParseFloat(resizeSplit[0], 2)
+				resizeFy, _ = strconv.ParseFloat(resizeSplit[1], 2)
+				if resizeFx < 1.00 {
+					imagesChange = append(
+						imagesChange,
+						"rs",
+						strconv.FormatFloat(resizeFx, 'f', 2, 64),
+						strconv.FormatFloat(resizeFy, 'f', 2, 64),
+					)
+					resizeF = true
+				} else {
+					resizeIx, _ = strconv.Atoi(resizeSplit[0])
+					resizeIy, _ = strconv.Atoi(resizeSplit[1])
+					imagesChange = append(imagesChange, "rs", strconv.Itoa(resizeIx), strconv.Itoa(resizeIy))
+					resizeI = true
+				}
+			}
+		}
 		// 缩放
 		if resize != "" {
 			resizeSplit := php2go.Explode(",", resize)
