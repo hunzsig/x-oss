@@ -46,7 +46,7 @@ func AnalysisFile(ctx iris.Context, file multipart.File, header *multipart.FileH
 	fileInfo.ContentType = strings.ToLower(header.Header.Get("Content-Type"))
 	fileNameSep := php2go.Explode(".", header.Filename)
 	// 后缀名
-	fileInfo.Suffix = fileNameSep[len(fileNameSep)-1]
+	fileInfo.Suffix = strings.ToLower(fileNameSep[len(fileNameSep)-1])
 	fileNameSep = fileNameSep[:len(fileNameSep)-1]
 	// 文件名
 	fileInfo.Name = php2go.Implode(".", fileNameSep)

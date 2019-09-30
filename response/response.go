@@ -18,8 +18,8 @@ func Html(ctx iris.Context, htmlcontent string) bool {
 	return true
 }
 
-func Download(ctx iris.Context, filename string) bool {
-	ctx.SendFile(filename, "helloworld.log")
+func Download(ctx iris.Context, filename string, destinationName string) bool {
+	ctx.SendFile(filename, destinationName)
 	return true
 }
 

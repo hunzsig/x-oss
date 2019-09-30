@@ -108,6 +108,7 @@ func Download(ctx iris.Context) bool {
 		// get value
 		resize := ctx.FormValue("resize")
 		rotate := ctx.FormValue("rotate")
+		blur := ctx.FormValue("blur")
 		colorGrayscale := ctx.FormValue("grayscale")
 		colorReverse := ctx.FormValue("reverse")
 		ascii := ctx.FormValue("ascii")
@@ -118,6 +119,7 @@ func Download(ctx iris.Context) bool {
 		var resizeFx float64
 		var resizeFy float64
 		var rotateAngle int
+		var blurDistance float64
 
 		resizeIx = 0
 		resizeIy = 0
@@ -148,7 +150,7 @@ func Download(ctx iris.Context) bool {
 				resizeFy = resizeFy * 0.01
 				imagesChange = append(
 					imagesChange,
-					"cg",
+					"rs",
 					strconv.FormatFloat(resizeFx, 'f', 2, 64),
 					strconv.FormatFloat(resizeFy, 'f', 2, 64),
 				)
@@ -159,7 +161,7 @@ func Download(ctx iris.Context) bool {
 				if resizeFx < 1.00 {
 					imagesChange = append(
 						imagesChange,
-						"cg",
+						"rs",
 						strconv.FormatFloat(resizeFx, 'f', 2, 64),
 						strconv.FormatFloat(resizeFy, 'f', 2, 64),
 					)
@@ -167,7 +169,7 @@ func Download(ctx iris.Context) bool {
 				} else {
 					resizeIx, _ = strconv.Atoi(resizeSplit[0])
 					resizeIy, _ = strconv.Atoi(resizeSplit[1])
-					imagesChange = append(imagesChange, "cg", strconv.Itoa(resizeIx), strconv.Itoa(resizeIy))
+					imagesChange = append(imagesChange, "rs", strconv.Itoa(resizeIx), strconv.Itoa(resizeIy))
 					resizeI = true
 				}
 			}
@@ -176,6 +178,14 @@ func Download(ctx iris.Context) bool {
 		if rotate != "" {
 			rotateAngle, _ = strconv.Atoi(rotate)
 			imagesChange = append(imagesChange, "ro")
+			imagesChange = append(imagesChange, strconv.Itoa(rotateAngle))
+			fileInfo.Suffix = "png" // 旋转时固定png，获得透明背景
+		}
+		// 模糊
+		if blur != "" {
+			blurDistance, _ = strconv.ParseFloat(blur, 1)
+			imagesChange = append(imagesChange, "bl")
+			imagesChange = append(imagesChange, strconv.FormatFloat(blurDistance, 'f', 1, 64))
 		}
 		// 灰度
 		if colorGrayscale == "1" {
@@ -187,12 +197,13 @@ func Download(ctx iris.Context) bool {
 		}
 		// ascii
 		if ascii == "1" {
-			imagesChange = append(imagesChange, "ascii")
+			imagesChange = append(imagesChange, "ii")
+			fileInfo.Suffix = "txt" // ascii时固定txt，获得文本
 		}
 
 		// 无改动时，返回原图
 		if len(imagesChange) == 0 {
-			return response.Download(ctx, fileInfo.Uri)
+			return response.Download(ctx, fileInfo.Uri, fileInfo.Name+"."+fileInfo.Suffix)
 		}
 
 		// 构建临时目录
@@ -202,12 +213,9 @@ func Download(ctx iris.Context) bool {
 			response.Error(ctx, err.Error(), nil)
 			return false
 		}
-		if ascii == "1" {
-			fileInfo.Suffix = "txt"
-		}
 		tempUri := tempImagesRoot + "/" + fileInfo.Hash + imagesChangeStr + "." + fileInfo.Suffix
 		if oss.IsExist(tempUri) == true {
-			return response.Download(ctx, tempUri)
+			return response.Download(ctx, tempUri, fileInfo.Name+"."+fileInfo.Suffix)
 		}
 
 		rgba := oss.ImageRGBA(fileInfo.Uri)
@@ -221,6 +229,10 @@ func Download(ctx iris.Context) bool {
 		// 旋转
 		if rotateAngle != 0 {
 			rgba = oss.ImageRotate(rgba, rotateAngle)
+		}
+		// 模糊
+		if blurDistance != 0.0 {
+			rgba = oss.ImageBlur(rgba, blurDistance)
 		}
 		// 灰度
 		if colorGrayscale == "1" {
@@ -243,15 +255,14 @@ func Download(ctx iris.Context) bool {
 			}
 			// images
 		} else {
-			err = oss.ImageEncode(tempUri, f, rgba)
+			err = oss.ImageEncode(f, rgba, fileInfo.Suffix)
 			if err != nil {
 				response.Error(ctx, err.Error(), nil)
 				return false
 			}
 		}
-		return response.Download(ctx, tempUri)
+		return response.Download(ctx, tempUri, fileInfo.Name+"."+fileInfo.Suffix)
 	}
-	php2go.Dump(fileInfo)
 	// 原库中文件
-	return response.Download(ctx, fileInfo.Uri)
+	return response.Download(ctx, fileInfo.Uri, fileInfo.Name+"."+fileInfo.Suffix)
 }

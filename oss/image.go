@@ -12,19 +12,18 @@ import (
 	"io/ioutil"
 	"math"
 	"os"
-	"strings"
 )
 
 /**
  * 图片编码
  */
-func ImageEncode(fileName string, file *os.File, rgba *image.RGBA) error {
+func ImageEncode(file *os.File, rgba *image.RGBA, suffix string) error {
 	var err error
-	if strings.HasSuffix(fileName, "jpg") || strings.HasSuffix(fileName, "jpeg") {
+	if suffix == "jpg" || suffix == "jpeg" {
 		err = jpeg.Encode(file, rgba, nil)
-	} else if strings.HasSuffix(fileName, "png") {
+	} else if suffix == "png" {
 		err = png.Encode(file, rgba)
-	} else if strings.HasSuffix(fileName, "gif") {
+	} else if suffix == "gif" {
 		err = gif.Encode(file, rgba, nil)
 	} else {
 		err = errors.New("Not support this format")
@@ -144,6 +143,18 @@ func ImageRotate(m *image.RGBA, angle int) *image.RGBA {
 	//
 	newRgba := image.NewRGBA(image.Rect(0, 0, W, H))
 	_ = graphics.Rotate(newRgba, m, &graphics.RotateOptions{Angle: radian})
+	return newRgba
+}
+
+/**
+ * 图片模糊
+ */
+func ImageBlur(m *image.RGBA, distance float64) *image.RGBA {
+	if distance == 0.0 {
+		return m
+	}
+	newRgba := image.NewRGBA(image.Rect(0, 0, m.Bounds().Dx(), m.Bounds().Dy()))
+	_ = graphics.Blur(newRgba, m, &graphics.BlurOptions{StdDev: distance})
 	return newRgba
 }
 
