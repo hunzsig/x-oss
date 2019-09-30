@@ -114,13 +114,21 @@ func Download(ctx iris.Context) bool {
 		colorReverse := ctx.FormValue("reverse")
 		ascii := ctx.FormValue("ascii")
 
-		// 缩放
+		var thumbX1 int
+		var thumbX2 int
+		var thumbY1 int
+		var thumbY2 int
 		var resizeIx int
 		var resizeIy int
 		var resizeFx float64
 		var resizeFy float64
 		var rotateAngle int
 		var blurDistance float64
+
+		thumbX1 = 0
+		thumbX2 = 0
+		thumbY1 = 0
+		thumbY2 = 0
 
 		resizeIx = 0
 		resizeIy = 0
@@ -129,6 +137,8 @@ func Download(ctx iris.Context) bool {
 
 		resizeI := false
 		resizeF := false
+
+		blurDistance = 0.0
 
 		// 裁剪
 		if thumb != "" {
@@ -267,6 +277,10 @@ func Download(ctx iris.Context) bool {
 
 		rgba := oss.ImageRGBA(fileInfo.Uri)
 
+		// 裁剪
+		if thumbX1 >= 0 && thumbX2 >= 0 && thumbY1 >= 0 && thumbY2 >= 0 {
+			rgba = oss.ImageThumb(rgba, resizeIx, resizeIy)
+		}
 		// 缩放
 		if resizeI {
 			rgba = oss.ImageResizeInt(rgba, resizeIx, resizeIy)

@@ -89,6 +89,21 @@ func ImageRGBA(uri string) *image.RGBA {
 }
 
 /**
+ * 图片裁剪
+ */
+func ImageThumb(m *image.RGBA, newDx int, newDy int) *image.RGBA {
+	bounds := m.Bounds()
+	dx := bounds.Dx()
+	dy := bounds.Dy()
+	if newDy <= 0 {
+		newDy = int(float64(newDx) * (float64(dy) / float64(dx)))
+	}
+	newRgba := image.NewRGBA(image.Rect(0, 0, newDx, newDy))
+	_ = graphics.Scale(newRgba, m)
+	return newRgba
+}
+
+/**
  * 图片缩放(int)
  */
 func ImageResizeInt(m *image.RGBA, newDx int, newDy int) *image.RGBA {
