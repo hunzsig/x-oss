@@ -2,7 +2,6 @@ package oss
 
 import (
 	"bytes"
-	"fmt"
 	"github.com/hunzsig/graphics"
 	"github.com/kataras/iris/core/errors"
 	"image"
@@ -11,6 +10,7 @@ import (
 	"image/jpeg"
 	"image/png"
 	"io/ioutil"
+	"math"
 	"os"
 	"strings"
 )
@@ -18,13 +18,13 @@ import (
 /**
  * 图片编码
  */
-func ImageEncode(inputName string, file *os.File, rgba *image.RGBA) error {
+func ImageEncode(fileName string, file *os.File, rgba *image.RGBA) error {
 	var err error
-	if strings.HasSuffix(inputName, "jpg") || strings.HasSuffix(inputName, "jpeg") {
+	if strings.HasSuffix(fileName, "jpg") || strings.HasSuffix(fileName, "jpeg") {
 		err = jpeg.Encode(file, rgba, nil)
-	} else if strings.HasSuffix(inputName, "png") {
+	} else if strings.HasSuffix(fileName, "png") {
 		err = png.Encode(file, rgba)
-	} else if strings.HasSuffix(inputName, "gif") {
+	} else if strings.HasSuffix(fileName, "gif") {
 		err = gif.Encode(file, rgba, nil)
 	} else {
 		err = errors.New("Not support this format")
@@ -33,19 +33,124 @@ func ImageEncode(inputName string, file *os.File, rgba *image.RGBA) error {
 }
 
 /**
- * 获取图片source
+ * 图片转ascii编码
  */
-func ImageFetch(source string) image.Image {
-	ff, _ := ioutil.ReadFile(source)
-	bbb := bytes.NewBuffer(ff)
-	m, _, _ := image.Decode(bbb)
+func ImageAscii(file *os.File, rgba *image.RGBA) error {
+	bounds := rgba.Bounds()
+	dx := bounds.Dx()
+	dy := bounds.Dy()
+	arr := []string{"M", "N", "H", "Q", "$", "O", "C", "?", "7", ">", "!", ":", "–", ";", "."}
+	var err error
+	for i := 0; i < dy; i++ {
+		for j := 0; j < dx; j++ {
+			colorRgb := rgba.At(j, i)
+			_, g, _, _ := colorRgb.RGBA()
+			avg := uint8(g >> 8)
+			num := avg / 18
+			_, err = file.WriteString(arr[num])
+			if j == dx-1 {
+				_, err = file.WriteString("\n")
+			}
+		}
+	}
+	return err
+}
+
+/**
+ * 获取图片 source
+ */
+func ImageSource(uri string) image.Image {
+	ff, _ := ioutil.ReadFile(uri)
+	b := bytes.NewBuffer(ff)
+	m, _, _ := image.Decode(b)
 	return m
+}
+
+/**
+ * 获取图片 RGBA
+ */
+func ImageRGBA(uri string) *image.RGBA {
+	source := ImageSource(uri)
+	bounds := source.Bounds()
+	dx := bounds.Dx()
+	dy := bounds.Dy()
+	newRgba := image.NewRGBA(source.Bounds())
+	for i := 0; i < dx; i++ {
+		for j := 0; j < dy; j++ {
+			colorRgb := source.At(i, j)
+			r, g, b, a := colorRgb.RGBA()
+			rUint8 := uint8(r >> 8)
+			gUint8 := uint8(g >> 8)
+			bUint8 := uint8(b >> 8)
+			aUint8 := uint8(a >> 8)
+			newRgba.SetRGBA(i, j, color.RGBA{R: rUint8, G: gUint8, B: bUint8, A: aUint8})
+		}
+	}
+	return newRgba
+}
+
+/**
+ * 图片缩放(int)
+ */
+func ImageResizeInt(m *image.RGBA, newDx int, newDy int) *image.RGBA {
+	bounds := m.Bounds()
+	dx := bounds.Dx()
+	dy := bounds.Dy()
+	if newDy <= 0 {
+		newDy = int(float64(newDx) * (float64(dy) / float64(dx)))
+	}
+	newRgba := image.NewRGBA(image.Rect(0, 0, newDx, newDy))
+	_ = graphics.Scale(newRgba, m)
+	return newRgba
+}
+
+/**
+ * 图片缩放(float)
+ */
+func ImageResizeFloat(m *image.RGBA, pcX float64, pcY float64) *image.RGBA {
+	bounds := m.Bounds()
+	dx := bounds.Dx()
+	dy := bounds.Dy()
+	newDx := float64(dx) * pcX
+	newDy := float64(0)
+	if pcY <= 0 {
+		newDy = newDx * (float64(dy) / float64(dx))
+	} else {
+		newDy = float64(dy) * pcY
+	}
+	newRgba := image.NewRGBA(image.Rect(0, 0, int(newDx), int(newDy)))
+	_ = graphics.Scale(newRgba, m)
+	return newRgba
+}
+
+/**
+ * 图片旋转
+ */
+func ImageRotate(m *image.RGBA, angle int) *image.RGBA {
+	angle = angle % 360
+	if angle == 0 {
+		return m
+	}
+	//弧度转换
+	radian := float64(angle) * math.Pi / 180.0
+	cos := math.Cos(float64(radian))
+	sin := math.Sin(radian)
+	//原图的宽高
+	w := float64(m.Bounds().Dx())
+	h := float64(m.Bounds().Dy())
+	//新图高宽
+	W := int(math.Max(math.Abs(float64(w*cos-h*sin)), math.Abs(w*cos+h*sin)))
+	H := int(math.Max(math.Abs(w*sin-h*cos), math.Abs(w*sin+h*cos)))
+	//
+	newRgba := image.NewRGBA(image.Rect(0, 0, W, H))
+	_ = graphics.Rotate(newRgba, m, &graphics.RotateOptions{Angle: radian})
+	return newRgba
 }
 
 /**
  * 图片色彩反转
  */
-func ImageColorReverse(m image.Image) *image.RGBA {
+func ImageColorReverse(m *image.RGBA) *image.RGBA {
 	bounds := m.Bounds()
 	dx := bounds.Dx()
 	dy := bounds.Dy()
@@ -70,7 +175,7 @@ func ImageColorReverse(m image.Image) *image.RGBA {
 /**
  * 图片灰度化处理
  */
-func ImageColorGrayscale(m image.Image) *image.RGBA {
+func ImageColorGrayscale(m *image.RGBA) *image.RGBA {
 	bounds := m.Bounds()
 	dx := bounds.Dx()
 	dy := bounds.Dy()
@@ -85,49 +190,4 @@ func ImageColorGrayscale(m image.Image) *image.RGBA {
 		}
 	}
 	return newRgba
-}
-
-/**
- * 图片缩放
- */
-func ImageResize(m image.Image, newdx int) *image.RGBA {
-	bounds := m.Bounds()
-	dx := bounds.Dx()
-	dy := bounds.Dy()
-	newRgba := image.NewRGBA(image.Rect(0, 0, newdx, newdx*dy/dx))
-	graphics.Scale(newRgba, m)
-	return newRgba
-}
-
-/**
- * 图片转为字符画（简易版）
- */
-func ImageAscll(m image.Image, target string) {
-	if m.Bounds().Dx() > 300 {
-		m = ImageResize(m, 300)
-	}
-	bounds := m.Bounds()
-	dx := bounds.Dx()
-	dy := bounds.Dy()
-	arr := []string{"M", "N", "H", "Q", "$", "O", "C", "?", "7", ">", "!", ":", "–", ";", "."}
-
-	fileName := target
-	dstFile, err := os.Create(fileName)
-	if err != nil {
-		fmt.Println(err.Error())
-		return
-	}
-	defer dstFile.Close()
-	for i := 0; i < dy; i++ {
-		for j := 0; j < dx; j++ {
-			colorRgb := m.At(j, i)
-			_, g, _, _ := colorRgb.RGBA()
-			avg := uint8(g >> 8)
-			num := avg / 18
-			dstFile.WriteString(arr[num])
-			if j == dx-1 {
-				dstFile.WriteString("\n")
-			}
-		}
-	}
 }
