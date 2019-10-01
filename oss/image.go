@@ -2,6 +2,7 @@ package oss
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/hunzsig/graphics"
 	"github.com/kataras/iris/core/errors"
 	"image"
@@ -95,6 +96,7 @@ func ImageThumb(m *image.RGBA, x1 int, y1 int, x2 int, y2 int) *image.RGBA {
 	bounds := m.Bounds()
 	dx := bounds.Dx()
 	dy := bounds.Dy()
+	fmt.Println(dx, dy)
 	if x1 < 0 {
 		x1 = 0
 	}
@@ -119,8 +121,22 @@ func ImageThumb(m *image.RGBA, x1 int, y1 int, x2 int, y2 int) *image.RGBA {
 	if y2 > dy {
 		y2 = dy
 	}
-	newRgba := image.NewRGBA(image.Rect(x1, y1, x2, y2))
-	_ = graphics.Scale(newRgba, m)
+	source := m.SubImage(image.Rect(x1, y1, x2, y2))
+	bounds = source.Bounds()
+	dx = bounds.Dx()
+	dy = bounds.Dy()
+	newRgba := image.NewRGBA(bounds)
+	for i := 0; i < dx; i++ {
+		for j := 0; j < dy; j++ {
+			colorRgb := source.At(i, j)
+			r, g, b, a := colorRgb.RGBA()
+			rUint8 := uint8(r >> 8)
+			gUint8 := uint8(g >> 8)
+			bUint8 := uint8(b >> 8)
+			aUint8 := uint8(a >> 8)
+			newRgba.SetRGBA(i, j, color.RGBA{R: rUint8, G: gUint8, B: bUint8, A: aUint8})
+		}
+	}
 	return newRgba
 }
 

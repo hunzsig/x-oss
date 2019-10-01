@@ -129,6 +129,7 @@ func Download(ctx iris.Context) bool {
 		thumbX2 = 0
 		thumbY1 = 0
 		thumbY2 = 0
+		thumbI := false
 
 		resizeIx = 0
 		resizeIy = 0
@@ -142,49 +143,22 @@ func Download(ctx iris.Context) bool {
 
 		// 裁剪
 		if thumb != "" {
-			resizeSplit := php2go.Explode(",", resize)
-			if len(resizeSplit) != 4 {
-				response.Error(ctx, "thumb has four vector", nil)
+			thumbSplit := php2go.Explode(",", thumb)
+			if len(thumbSplit) != 4 {
+				response.Error(ctx, "thumb has 4 vector", nil)
 				return false
 			}
-			for idx, v := range resizeSplit {
+			for idx, v := range thumbSplit {
 				if v != "" {
-					resizeSplit[idx] = php2go.Trim(v, " ")
+					thumbSplit[idx] = php2go.Trim(v, " ")
 				}
 			}
-
-			if php2go.Strpos(resizeSplit[0], "%", 0) > -1 { // 百分比形式时
-				resizeSplit[0] = php2go.StrReplace("%", "", resizeSplit[0], -1)
-				resizeSplit[1] = php2go.StrReplace("%", "", resizeSplit[1], -1)
-				resizeFx, _ = strconv.ParseFloat(resizeSplit[0], 2)
-				resizeFy, _ = strconv.ParseFloat(resizeSplit[1], 2)
-				resizeFx = resizeFx * 0.01
-				resizeFy = resizeFy * 0.01
-				imagesChange = append(
-					imagesChange,
-					"rs",
-					strconv.FormatFloat(resizeFx, 'f', 2, 64),
-					strconv.FormatFloat(resizeFy, 'f', 2, 64),
-				)
-				resizeF = true
-			} else {
-				resizeFx, _ = strconv.ParseFloat(resizeSplit[0], 2)
-				resizeFy, _ = strconv.ParseFloat(resizeSplit[1], 2)
-				if resizeFx < 1.00 {
-					imagesChange = append(
-						imagesChange,
-						"rs",
-						strconv.FormatFloat(resizeFx, 'f', 2, 64),
-						strconv.FormatFloat(resizeFy, 'f', 2, 64),
-					)
-					resizeF = true
-				} else {
-					resizeIx, _ = strconv.Atoi(resizeSplit[0])
-					resizeIy, _ = strconv.Atoi(resizeSplit[1])
-					imagesChange = append(imagesChange, "rs", strconv.Itoa(resizeIx), strconv.Itoa(resizeIy))
-					resizeI = true
-				}
-			}
+			thumbX1, _ = strconv.Atoi(thumbSplit[0])
+			thumbY1, _ = strconv.Atoi(thumbSplit[1])
+			thumbX2, _ = strconv.Atoi(thumbSplit[2])
+			thumbY2, _ = strconv.Atoi(thumbSplit[3])
+			imagesChange = append(imagesChange, "tb", strconv.Itoa(thumbX1), strconv.Itoa(thumbY1), strconv.Itoa(thumbX2), strconv.Itoa(thumbY2))
+			thumbI = true
 		}
 		// 缩放
 		if resize != "" {
@@ -278,8 +252,8 @@ func Download(ctx iris.Context) bool {
 		rgba := oss.ImageRGBA(fileInfo.Uri)
 
 		// 裁剪
-		if thumbX1 >= 0 && thumbX2 >= 0 && thumbY1 >= 0 && thumbY2 >= 0 {
-			rgba = oss.ImageThumb(rgba, resizeIx, resizeIy)
+		if thumbI {
+			rgba = oss.ImageThumb(rgba, thumbX1, thumbY1, thumbX2, thumbY2)
 		}
 		// 缩放
 		if resizeI {
