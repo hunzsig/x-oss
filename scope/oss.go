@@ -70,10 +70,13 @@ func UploadMulti(ctx iris.Context) bool {
 		fileInfo, err := oss.AnalysisFile(ctx, nil, file)
 		if err != nil {
 			failures++
-			returnData = append(returnData, nil)
+			item := make(map[string]string)
+			item["err"] = err.Error()
+			returnData = append(returnData, item)
 		} else {
 			success++
 			item := make(map[string]string)
+			item["err"] = ""
 			item["key"] = fileInfo.Key
 			item["size"] = fileInfo.Size
 			item["name"] = fileInfo.Name

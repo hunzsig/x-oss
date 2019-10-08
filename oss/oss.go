@@ -85,8 +85,7 @@ func AnalysisFile(ctx iris.Context, file multipart.File, header *multipart.FileH
 		return fileInfoOld, nil
 	}
 	// record db
-	tx := database.Mysql().Connect
-	tx = tx.Begin()
+	tx := database.Mysql().Connect.Begin()
 	fileInfo.UserToken = ctx.Params().Get("user_token")
 	fileInfo.FromUrl = ""
 	fileInfo.CallQty = "0"
@@ -115,6 +114,9 @@ func AnalysisFile(ctx iris.Context, file multipart.File, header *multipart.FileH
 		go os.Remove(fileInfo.Uri)
 		return fileInfo, err
 	}
-	tx.Commit()
+	if tx.Commit().Error != nil {
+		go os.Remove(fileInfo.Uri)
+		return fileInfo, tx.Commit().Error
+	}
 	return fileInfo, nil
 }
