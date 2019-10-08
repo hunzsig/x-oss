@@ -84,7 +84,7 @@ func UploadMulti(ctx iris.Context) bool {
 			returnData = append(returnData, item)
 		}
 	}
-	return response.Success(ctx, "upload_ok", returnData)
+	return response.Success(ctx, "upload_over", returnData)
 }
 
 /**
