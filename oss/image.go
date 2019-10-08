@@ -173,6 +173,50 @@ func ImageResizeFloat(m *image.RGBA, pcX float64, pcY float64) *image.RGBA {
 }
 
 /**
+ * 图片水平翻转
+ */
+func ImageFlipX(m *image.RGBA) *image.RGBA {
+	bounds := m.Bounds()
+	dx := bounds.Dx()
+	dy := bounds.Dy()
+	newRgba := image.NewRGBA(bounds)
+	for i := 0; i < dx; i++ {
+		for j := 0; j < dy; j++ {
+			colorRgb := m.At(dx-i-1, j)
+			r, g, b, a := colorRgb.RGBA()
+			rUint8 := uint8(r >> 8)
+			gUint8 := uint8(g >> 8)
+			bUint8 := uint8(b >> 8)
+			aUint8 := uint8(a >> 8)
+			newRgba.SetRGBA(i, j, color.RGBA{R: rUint8, G: gUint8, B: bUint8, A: aUint8})
+		}
+	}
+	return newRgba
+}
+
+/**
+ * 图片垂直翻转
+ */
+func ImageFlipY(m *image.RGBA) *image.RGBA {
+	bounds := m.Bounds()
+	dx := bounds.Dx()
+	dy := bounds.Dy()
+	newRgba := image.NewRGBA(bounds)
+	for i := 0; i < dx; i++ {
+		for j := 0; j < dy; j++ {
+			colorRgb := m.At(i, dy-j-1)
+			r, g, b, a := colorRgb.RGBA()
+			rUint8 := uint8(r >> 8)
+			gUint8 := uint8(g >> 8)
+			bUint8 := uint8(b >> 8)
+			aUint8 := uint8(a >> 8)
+			newRgba.SetRGBA(i, j, color.RGBA{R: rUint8, G: gUint8, B: bUint8, A: aUint8})
+		}
+	}
+	return newRgba
+}
+
+/**
  * 图片旋转
  */
 func ImageRotate(m *image.RGBA, angle int) *image.RGBA {

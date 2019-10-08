@@ -124,6 +124,7 @@ func Download(ctx iris.Context) bool {
 		// get value
 		thumb := ctx.FormValue("thumb")
 		resize := ctx.FormValue("resize")
+		flip := ctx.FormValue("flip")
 		rotate := ctx.FormValue("rotate")
 		blur := ctx.FormValue("blur")
 		colorGrayscale := ctx.FormValue("grayscale")
@@ -134,27 +135,32 @@ func Download(ctx iris.Context) bool {
 		var thumbX2 int
 		var thumbY1 int
 		var thumbY2 int
-		var resizeIx int
-		var resizeIy int
-		var resizeFx float64
-		var resizeFy float64
-		var rotateAngle int
-		var blurDistance float64
-
 		thumbX1 = 0
 		thumbX2 = 0
 		thumbY1 = 0
 		thumbY2 = 0
 		thumbI := false
 
+		var resizeIx int
+		var resizeIy int
+		var resizeFx float64
+		var resizeFy float64
 		resizeIx = 0
 		resizeIy = 0
 		resizeFx = 0.00
 		resizeFy = 0.00
-
 		resizeI := false
 		resizeF := false
 
+		var flipX int
+		var flipY int
+		flipX = 0
+		flipY = 0
+
+		var rotateAngle int
+		rotateAngle = 0
+
+		var blurDistance float64
 		blurDistance = 0.0
 
 		// 裁剪
@@ -221,6 +227,22 @@ func Download(ctx iris.Context) bool {
 				}
 			}
 		}
+		// 翻转
+		if flip != "" {
+			flipSplit := php2go.Explode(",", flip)
+			if len(flipSplit) != 2 {
+				response.Error(ctx, "flip has 2 vector", nil)
+				return false
+			}
+			for idx, v := range flipSplit {
+				if v != "" {
+					flipSplit[idx] = php2go.Trim(v, " ")
+				}
+			}
+			flipX, _ = strconv.Atoi(flipSplit[0])
+			flipY, _ = strconv.Atoi(flipSplit[1])
+			imagesChange = append(imagesChange, "fl", strconv.Itoa(flipX), strconv.Itoa(flipY))
+		}
 		// 旋转
 		if rotate != "" {
 			rotateAngle, _ = strconv.Atoi(rotate)
@@ -284,6 +306,14 @@ func Download(ctx iris.Context) bool {
 			rgba = oss.ImageResizeInt(rgba, resizeIx, resizeIy)
 		} else if resizeF {
 			rgba = oss.ImageResizeFloat(rgba, resizeFx, resizeFy)
+		}
+		// 水平翻转
+		if flipX == 1 {
+			rgba = oss.ImageFlipX(rgba)
+		}
+		// 垂直翻转
+		if flipY == 1 {
+			rgba = oss.ImageFlipY(rgba)
 		}
 		// 旋转
 		if rotateAngle != 0 {
