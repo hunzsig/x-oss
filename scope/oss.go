@@ -7,6 +7,7 @@ import (
 	"../php2go"
 	"../response"
 	"github.com/kataras/iris"
+	"io/ioutil"
 	"os"
 	"strconv"
 	"strings"
@@ -14,6 +15,18 @@ import (
 )
 
 const tempImagesRoot = "./my_data/temp_images"
+
+/**
+ * 清理temp文件
+ */
+func clearTemp(tempDate string) {
+	rd, _ := ioutil.ReadDir(tempImagesRoot)
+	for _, fi := range rd {
+		if fi.IsDir() && fi.Name() != tempDate {
+			_ = os.RemoveAll(tempImagesRoot + "/" + fi.Name())
+		}
+	}
+}
 
 /**
  * 上传文件（一个）
@@ -237,14 +250,22 @@ func Download(ctx iris.Context) bool {
 			return response.Download(ctx, fileInfo.Uri, fileInfo.Name+"."+fileInfo.Suffix)
 		}
 
-		// 构建临时目录
+		// 构建临时目录,临时文件保留一个月，过后清理
 		imagesChangeStr := "_" + php2go.Implode("_", imagesChange)
-		err := os.MkdirAll(tempImagesRoot, os.ModePerm)
-		if err != nil {
-			response.Error(ctx, err.Error(), nil)
-			return false
+		tempDate := time.Now().Format("200601")
+
+		// clear temp
+		go clearTemp(tempDate)
+
+		tempPath := tempImagesRoot + "/" + tempDate + "/"
+		if oss.IsExist(tempPath) == false {
+			err := os.MkdirAll(tempPath, os.ModePerm)
+			if err != nil {
+				response.Error(ctx, err.Error(), nil)
+				return false
+			}
 		}
-		tempUri := tempImagesRoot + "/" + fileInfo.Hash + imagesChangeStr + "." + fileInfo.Suffix
+		tempUri := tempPath + fileInfo.Hash + imagesChangeStr + "." + fileInfo.Suffix
 		if oss.IsExist(tempUri) == true {
 			return response.Download(ctx, tempUri, fileInfo.Name+"."+fileInfo.Suffix)
 		}
@@ -283,14 +304,14 @@ func Download(ctx iris.Context) bool {
 
 		// ascii
 		if ascii == "1" {
-			err = oss.ImageAscii(f, rgba)
+			err := oss.ImageAscii(f, rgba)
 			if err != nil {
 				response.Error(ctx, err.Error(), nil)
 				return false
 			}
 			// images
 		} else {
-			err = oss.ImageEncode(f, rgba, fileInfo.Suffix)
+			err := oss.ImageEncode(f, rgba, fileInfo.Suffix)
 			if err != nil {
 				response.Error(ctx, err.Error(), nil)
 				return false

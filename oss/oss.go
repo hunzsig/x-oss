@@ -83,30 +83,38 @@ func AnalysisFile(ctx iris.Context, file multipart.File, header *multipart.FileH
 	database.Mysql().Connect.Where("hash = ?", fileHash).First(&fileInfoOld)
 	if fileInfoOld.Hash == fileHash {
 		return fileInfoOld, nil
-	} else {
-		// record db
-		fileInfo.UserToken = ctx.Params().Get("user_token")
-		fileInfo.FromUrl = ""
-		fileInfo.CallQty = "0"
-		fileInfo.CallLastTime = now
-		fileInfo.CreateTime = now
-		fileInfo.UpdateTime = now
-		database.Mysql().Connect.Save(&fileInfo)
-		defer database.Mysql().Connect.Close()
 	}
+	// record db
+	tx := database.Mysql().Connect
+	tx = tx.Begin()
+	fileInfo.UserToken = ctx.Params().Get("user_token")
+	fileInfo.FromUrl = ""
+	fileInfo.CallQty = "0"
+	fileInfo.CallLastTime = now
+	fileInfo.CreateTime = now
+	fileInfo.UpdateTime = now
+	tx.Save(&fileInfo)
+	defer tx.Close()
 
 	// 保存文件
 	err = os.MkdirAll(fileInfo.Path, os.ModePerm)
 	if err != nil {
+		tx.Rollback()
 		return fileInfo, err
 	}
 	out, err := os.OpenFile(fileInfo.Uri, os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
+		tx.Rollback()
 		return fileInfo, err
 	}
 	defer out.Close()
-	out.Write(bytes)
-	// io.Copy(out, file)
-
+	_, err = out.Write(bytes)
+	// _, err = io.Copy(out, file)
+	if err != nil {
+		tx.Rollback()
+		go os.Remove(fileInfo.Uri)
+		return fileInfo, err
+	}
+	tx.Commit()
 	return fileInfo, nil
 }
