@@ -38,15 +38,13 @@ CREATE TABLE `files`
 DROP TABLE IF EXISTS `users`;
 CREATE TABLE `users`
 (
-    `token`            CHAR(255)     NOT NULL COMMENT '用户唯一token key',
-    `status`           TINYINT       NOT NULL DEFAULT 1 COMMENT '状态 -1无效 1有效',
-    `level`            INT UNSIGNED  NOT NULL DEFAULT 1 COMMENT '等级',
-    `exp`              INT UNSIGNED  NOT NULL DEFAULT 1 COMMENT '经验',
-    `allow_size_unit`  CHAR(255)     NOT NULL COMMENT '文件大小单位',
-    `allow_size_total` BIGINT        NOT NULL COMMENT '允许储存的总体文件大小',
-    `allow_size_one`   BIGINT        NOT NULL COMMENT '允许储存的单个文件大小',
-    `allow_qty`        BIGINT        NOT NULL COMMENT '允许储存的文件数',
-    `allow_suffix`     VARCHAR(1024) NOT NULL DEFAULT '' COMMENT '允许的文件后缀',
+    `token`           CHAR(255)     NOT NULL COMMENT '用户唯一token key',
+    `status`          TINYINT       NOT NULL DEFAULT 1 COMMENT '状态 -1无效 1有效',
+    `level`           INT UNSIGNED  NOT NULL DEFAULT 1 COMMENT '等级',
+    `exp`             INT UNSIGNED  NOT NULL DEFAULT 1 COMMENT '经验',
+    `allow_file_size` BIGINT        NOT NULL COMMENT '允许储存的单个文件大小',
+    `allow_qty`       BIGINT        NOT NULL COMMENT '允许储存的文件数',
+    `allow_suffix`    VARCHAR(1024) NOT NULL DEFAULT '' COMMENT '允许的文件后缀',
     PRIMARY KEY (`token`),
     INDEX (`status`),
     INDEX (`level`)
@@ -63,14 +61,13 @@ CREATE TABLE `setting`
 
 
 
-INSERT INTO `users` (`token`, `status`, `level`, `exp`, `allow_size_unit`, `allow_size_total`, `allow_size_one`,
-                     `allow_qty`, `allow_suffix`)
-VALUES ('hunzsig', '1', '999', '0', 'TB', '99999', '99999', '99999',
-        ',,,,,mp4,rmvb,mkv,avi,wmv,mov,mpg,3gp,mp3,wma,ape,flac,wav,ogg,m4a,gif,jpeg,jpg,bmp,png,ico,tga,txt,pdf,doc,docx,ppt,pptx,xls,xlsx,csv,psd,rar,7z,zip,iso,cso');
+INSERT INTO `users` (`token`, `status`, `level`, `exp`, `allow_file_size`, `allow_qty`, `allow_suffix`)
+VALUES ('hunzsig', 1, 999, 0, 1099511627776, 99999,
+        'mp4,rmvb,mkv,avi,wmv,mov,mpg,3gp,mp3,wma,ape,flac,wav,ogg,m4a,gif,jpeg,jpg,bmp,png,ico,tga,txt,pdf,doc,docx,ppt,pptx,xls,xlsx,csv,psd,rar,7z,zip,iso,cso');
 
 INSERT INTO `setting` (`key`, `data`)
-VALUES ('size_unit', ',,,,,KB,MB,GB,TB');
+VALUES ('size_unit', 'B,KB,MB,GB,TB');
 
 INSERT INTO `setting` (`key`, `data`)
 VALUES ('file_suffix',
-        ',,,,,mp4,rmvb,mkv,avi,wmv,mov,mpg,3gp,mp3,wma,ape,flac,wav,ogg,m4a,gif,jpeg,jpg,bmp,png,ico,tga,txt,pdf,doc,docx,ppt,pptx,xls,xlsx,csv,psd,rar,7z,zip,iso,cso');
+        'mp4,rmvb,mkv,avi,wmv,mov,mpg,3gp,mp3,wma,ape,flac,wav,ogg,m4a,gif,jpeg,jpg,bmp,png,ico,tga,txt,pdf,doc,docx,ppt,pptx,xls,xlsx,csv,psd,rar,7z,zip,iso,cso');

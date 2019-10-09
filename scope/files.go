@@ -8,17 +8,18 @@ import (
 )
 
 func filesWhere(ctx iris.Context, con *gorm.DB) *gorm.DB {
-	if ctx.Params().Get("hash") != "" {
-		con.Where("`hash` like %?%", ctx.Params().Get("hash"))
+	con = con.Where("`user_token` = ?", ctx.Params().Get("user_token"))
+	if ctx.FormValue("hash") != "" {
+		con = con.Where("`hash` like ?", "%"+ctx.FormValue("hash")+"%")
 	}
-	if ctx.Params().Get("key") != "" {
-		con.Where("`key` like %?%", ctx.Params().Get("key"))
+	if ctx.FormValue("key") != "" {
+		con = con.Where("`key` like ?", "%"+ctx.FormValue("key")+"%")
 	}
-	if ctx.Params().Get("user_token") != "" {
-		con.Where("`user_token` like %?%", ctx.Params().Get("user_token"))
+	if ctx.FormValue("user_token") != "" {
+		con = con.Where("`user_token` like ?", "%"+ctx.FormValue("user_token")+"%")
 	}
-	if ctx.Params().Get("name") != "" {
-		con.Where("`name` like %?%", ctx.Params().Get("name"))
+	if ctx.FormValue("name") != "" {
+		con = con.Where("`name` like ?", "%"+ctx.FormValue("name")+"%")
 	}
 	return con
 }
@@ -28,7 +29,7 @@ func filesWhere(ctx iris.Context, con *gorm.DB) *gorm.DB {
  */
 func FilesInfo(ctx iris.Context) models.Files {
 	files := models.Files{}
-	con := database.Mysql().Connect
+	con := database.Mysql().Connect.Debug()
 	con = filesWhere(ctx, con)
 	con.First(&files)
 	result := files

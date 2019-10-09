@@ -9,8 +9,8 @@ import (
 	"github.com/kataras/iris"
 )
 
-const fileMaxSize = 10 << 20      // 10MB
-const multiFileMaxSize = 50 << 20 // 50MB
+const fileMaxSize = 100 << 20      // 100MB
+const multiFileMaxSize = 500 << 20 // 500MB
 
 func route(app *iris.Application) {
 
@@ -46,10 +46,10 @@ func route(app *iris.Application) {
 			*/
 			uploadType := ctx.Params().Get("type")
 			if uploadType == "multi" {
-				ctx.SetMaxRequestBodySize(multiFileMaxSize + 1<<20)
+				ctx.SetMaxRequestBodySize(multiFileMaxSize)
 				scope.UploadMulti(ctx)
 			} else {
-				ctx.SetMaxRequestBodySize(fileMaxSize + 1<<20)
+				ctx.SetMaxRequestBodySize(fileMaxSize)
 				scope.UploadOne(ctx)
 			}
 		})
@@ -57,6 +57,12 @@ func route(app *iris.Application) {
 		// download file by key
 		oss.Get("/download/{fileKey:string}", func(ctx iris.Context) {
 			scope.Download(ctx)
+		})
+
+		// get settings
+		oss.Get("/settings", func(ctx iris.Context) {
+			setting := scope.Settings()
+			response.Success(ctx, "ok", setting)
 		})
 
 		// get files info
