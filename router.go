@@ -19,6 +19,12 @@ func route(app *iris.Application) {
 		scope.HomePage(ctx)
 	})
 
+	// get settings
+	app.Get("/settings", func(ctx iris.Context) {
+		setting := scope.Settings()
+		response.Success(ctx, "ok", setting)
+	})
+
 	oss := app.Party("/oss/{token:string}", func(ctx iris.Context) {
 		token := ctx.Params().Get("token")
 		if token != "" {
@@ -59,12 +65,6 @@ func route(app *iris.Application) {
 			scope.Download(ctx)
 		})
 
-		// get settings
-		oss.Get("/settings", func(ctx iris.Context) {
-			setting := scope.Settings()
-			response.Success(ctx, "ok", setting)
-		})
-
 		// get files info
 		oss.Get("/file", func(ctx iris.Context) {
 			files := scope.FilesInfo(ctx)
@@ -76,4 +76,5 @@ func route(app *iris.Application) {
 			response.Success(ctx, "ok", files)
 		})
 	}
+
 }
