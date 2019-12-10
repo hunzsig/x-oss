@@ -2,8 +2,8 @@ package oss
 
 import (
 	"bytes"
+	"errors"
 	"github.com/hunzsig/graphics"
-	"github.com/kataras/iris/core/errors"
 	"image"
 	"image/color"
 	"image/gif"

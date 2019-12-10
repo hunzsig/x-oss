@@ -20,8 +20,11 @@ git clone https://github.com/golang/net.git golang.org/x/net(备用https://githu
 
 报golang.org/x/crypto错请：
 git clone https://github.com/golang/crypto.git golang.org/x/crypto(备用https://github.com/hunzsig/crypto.git)
+
 其他类似~~
 其中golang.org/路径是gopath对应存放的目录，根据本地目录自行调整结构
+
+
 ```
 
 > mac 版本不对应
