@@ -2,13 +2,12 @@
 
 ---
 
-> 安装依赖
+> 依赖
 ```
 go get -u github.com/kataras/iris
 go get -u github.com/go-sql-driver/mysql
 go get -u github.com/lib/pq
 go get -u github.com/denisenkom/go-mssqldb # need golang.org/x/crypto/md4
-go get -u github.com/mattn/go-sqlite3   // 需要 gcc++ http://www.mingw.org
 go get -u github.com/gomodule/redigo/redis
 go get -u github.com/jinzhu/gorm
 go get -u github.com/hunzsig/graphics

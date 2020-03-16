@@ -1,8 +1,8 @@
 package database
 
 import (
-	"../mapping"
 	"fmt"
+	"x-oss/mapping"
 )
 
 // 构建 dsn

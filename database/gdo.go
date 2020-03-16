@@ -1,12 +1,11 @@
 package database
 
 import (
-	"../mapping"
 	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/mssql"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"time"
+	"x-oss/mapping"
 )
 
 // DB 对象

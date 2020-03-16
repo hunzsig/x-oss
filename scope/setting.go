@@ -1,9 +1,9 @@
 package scope
 
 import (
-	"../database"
-	"../models"
-	"../php2go"
+	"x-oss/database"
+	"x-oss/models"
+	"x-oss/php2go"
 )
 
 type SettingResult struct {

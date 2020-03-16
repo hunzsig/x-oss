@@ -1,7 +1,7 @@
 package html
 
 import (
-	"../php2go"
+	"x-oss/php2go"
 )
 
 type HtmlBuilder struct {

@@ -1,13 +1,13 @@
 package record
 
 import (
-	"../database"
-	"../models"
 	"encoding/json"
 	"fmt"
 	"github.com/kataras/iris"
 	"os"
 	"time"
+	"x-oss/database"
+	"x-oss/models"
 )
 
 const RecordsRoot = "./my_data/records/"

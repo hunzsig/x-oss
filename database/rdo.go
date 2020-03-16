@@ -1,8 +1,8 @@
 package database
 
 import (
-	"../mapping"
 	"github.com/gomodule/redigo/redis"
+	"x-oss/mapping"
 )
 
 // DB 对象

@@ -1,15 +1,15 @@
 package oss
 
 import (
-	"../database"
-	"../models"
-	"../php2go"
 	"github.com/kataras/iris"
 	"mime/multipart"
 	"os"
 	"strconv"
 	"strings"
 	"time"
+	"x-oss/database"
+	"x-oss/models"
+	"x-oss/php2go"
 )
 
 const UploadsRoot = "./my_data/uploads/"

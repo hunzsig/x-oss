@@ -1,10 +1,10 @@
 package scope
 
 import (
-	"../database"
-	"../models"
 	"github.com/jinzhu/gorm"
 	"github.com/kataras/iris"
+	"x-oss/database"
+	"x-oss/models"
 )
 
 func filesWhere(ctx iris.Context, con *gorm.DB) *gorm.DB {

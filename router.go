@@ -1,12 +1,12 @@
 package main
 
 import (
-	"./database"
-	"./mapping"
-	"./models"
-	"./response"
-	"./scope"
 	"github.com/kataras/iris"
+	"x-oss/database"
+	"x-oss/mapping"
+	"x-oss/models"
+	"x-oss/response"
+	"x-oss/scope"
 )
 
 const fileMaxSize = 100 << 20      // 100MB

@@ -1,10 +1,10 @@
 package scope
 
 import (
-	"../html"
-	"../php2go"
-	"../response"
 	"github.com/kataras/iris"
+	"x-oss/html"
+	"x-oss/php2go"
+	"x-oss/response"
 )
 
 var (

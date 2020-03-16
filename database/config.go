@@ -1,7 +1,7 @@
 package database
 
 import (
-	"../env"
+	"x-oss/env"
 )
 
 var (

@@ -1,8 +1,8 @@
 package response
 
 import (
-	"../record"
 	"github.com/kataras/iris"
+	"x-oss/record"
 )
 
 func rec(ctx iris.Context, code int16, msg string) {

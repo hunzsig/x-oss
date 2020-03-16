@@ -1,17 +1,17 @@
 package scope
 
 import (
-	"../database"
-	"../models"
-	"../oss"
-	"../php2go"
-	"../response"
 	"github.com/kataras/iris"
 	"io/ioutil"
 	"os"
 	"strconv"
 	"strings"
 	"time"
+	"x-oss/database"
+	"x-oss/models"
+	"x-oss/oss"
+	"x-oss/php2go"
+	"x-oss/response"
 )
 
 const tempImagesRoot = "./my_data/temp_images"

@@ -1,12 +1,12 @@
 package env
 
 import (
-	"../php2go"
 	"fmt"
 	"reflect"
 	"strconv"
 	"strings"
 	"time"
+	"x-oss/php2go"
 )
 
 var (

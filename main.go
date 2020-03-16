@@ -1,11 +1,11 @@
 package main
 
 import (
-	"./env"
-	"./response"
 	"github.com/kataras/iris"
 	"github.com/kataras/iris/middleware/logger"
 	"github.com/kataras/iris/middleware/recover"
+	"x-oss/env"
+	"x-oss/response"
 )
 
 func main() {
