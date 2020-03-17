@@ -3,8 +3,10 @@ package main
 import (
 	"github.com/kataras/iris"
 	"x-oss/database"
+	"x-oss/env"
 	"x-oss/mapping"
 	"x-oss/models"
+	"x-oss/php2go"
 	"x-oss/response"
 	"x-oss/scope"
 )
@@ -12,7 +14,19 @@ import (
 const fileMaxSize = 100 << 20      // 100MB
 const multiFileMaxSize = 500 << 20 // 500MB
 
+func enter(ctx iris.Context) {
+	if php2go.InArray(ctx.RemoteAddr(), env.Data.Hosts) == false {
+		response.NotFound(ctx, "x-oss", nil)
+	} else {
+		ctx.Next()
+	}
+}
+
 func route(app *iris.Application) {
+
+	// before enter
+	// 根据env的Hosts配置，禁止除此IP的服务器访问
+	app.Use(enter)
 
 	// default home
 	app.Handle("GET", "/", func(ctx iris.Context) {
