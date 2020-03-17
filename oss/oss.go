@@ -1,6 +1,7 @@
 package oss
 
 import (
+	"errors"
 	"github.com/kataras/iris"
 	"mime/multipart"
 	"os"
@@ -8,6 +9,7 @@ import (
 	"strings"
 	"time"
 	"x-oss/database"
+	"x-oss/env"
 	"x-oss/models"
 	"x-oss/php2go"
 )
@@ -47,6 +49,10 @@ func AnalysisFile(ctx iris.Context, file multipart.File, header *multipart.FileH
 	fileNameSep := php2go.Explode(".", header.Filename)
 	// 后缀名
 	fileInfo.Suffix = strings.ToLower(fileNameSep[len(fileNameSep)-1])
+	// check FileSuffix
+	if php2go.InArray(fileInfo.Suffix, env.Data.FileSuffix) == false {
+		return fileInfo, errors.New("Do not support this file suffix")
+	}
 	fileNameSep = fileNameSep[:len(fileNameSep)-1]
 	// 文件名
 	fileInfo.Name = php2go.Implode(".", fileNameSep)

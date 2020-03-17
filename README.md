@@ -35,7 +35,7 @@ unix / mac
 ```
 反相：reverse=1 (isdo)
 灰度：grayscale=1 (isdo)
-缩放：resize=20%,20% (width,height)支持百分比及固定参数,height可省略
+缩放：resize=20%,20% (width,height)支持百分比（urlencode=%25）及固定参数,height可省略
 模糊：blur=2 (distance)模糊程度，数值越大越模糊
 裁剪：thumb=500,500,1200,1200 (x1,y1,x2,y2) 坐标以左上角为(0,0)
 翻转：flip=0,1 (x,y) 支持0 or 1，1表示该轴翻转

@@ -3,11 +3,13 @@ package env
 import "time"
 
 type envReflect struct {
-	App     string
-	Port    string   `default:"8080"`
-	Debug   bool     `default:"0"`
-	Hosts   []string `default:"127.0.0.1"`
-	Timeout time.Duration
+	App           string
+	Port          string   `default:"8080"`
+	Debug         bool     `default:"0"`
+	Hosts         []string `default:"127.0.0.1"`
+	Timeout       time.Duration
+	FileMaxSizeMb int64
+	FileSuffix    []string `default:"gif,jpeg,jpg,bmp,png,ico,tga,txt,pdf,doc,docx,ppt,pptx,xls,xlsx,csv,psd,rar,7z,zip"`
 
 	RedisHost     string `default:"127.0.0.1"`
 	RedisPort     string `default:"6379"`

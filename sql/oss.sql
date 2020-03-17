@@ -38,36 +38,12 @@ CREATE TABLE `files`
 DROP TABLE IF EXISTS `users`;
 CREATE TABLE `users`
 (
-    `token`           CHAR(255)     NOT NULL COMMENT '用户唯一token key',
-    `status`          TINYINT       NOT NULL DEFAULT 1 COMMENT '状态 -1无效 1有效',
-    `level`           INT UNSIGNED  NOT NULL DEFAULT 1 COMMENT '等级',
-    `exp`             INT UNSIGNED  NOT NULL DEFAULT 1 COMMENT '经验',
-    `allow_file_size` BIGINT        NOT NULL COMMENT '允许储存的单个文件大小',
-    `allow_qty`       BIGINT        NOT NULL COMMENT '允许储存的文件数',
-    `allow_suffix`    VARCHAR(1024) NOT NULL DEFAULT '' COMMENT '允许的文件后缀',
+    `token`  CHAR(255) NOT NULL COMMENT '用户唯一token key',
+    `status` TINYINT   NOT NULL DEFAULT 1 COMMENT '状态 -1无效 1有效',
     PRIMARY KEY (`token`),
-    INDEX (`status`),
-    INDEX (`level`)
-) ENGINE = INNODB COMMENT '资源等级参数';
+    INDEX (`status`)
+) ENGINE = INNODB COMMENT 'users tokens';
 
 
-DROP TABLE IF EXISTS `setting`;
-CREATE TABLE `setting`
-(
-    `key`  CHAR(255)     NOT NULL COMMENT 'key',
-    `data` varchar(1024) NOT NULL DEFAULT '' COMMENT '数据',
-    PRIMARY KEY (`key`)
-) ENGINE = INNODB COMMENT '系统配置';
-
-
-
-INSERT INTO `users` (`token`, `status`, `level`, `exp`, `allow_file_size`, `allow_qty`, `allow_suffix`)
-VALUES ('hunzsig', 1, 999, 0, 1099511627776, 99999,
-        'mp4,rmvb,mkv,avi,wmv,mov,mpg,3gp,mp3,wma,ape,flac,wav,ogg,m4a,gif,jpeg,jpg,bmp,png,ico,tga,txt,pdf,doc,docx,ppt,pptx,xls,xlsx,csv,psd,rar,7z,zip,iso,cso');
-
-INSERT INTO `setting` (`key`, `data`)
-VALUES ('size_unit', 'B,KB,MB,GB,TB');
-
-INSERT INTO `setting` (`key`, `data`)
-VALUES ('file_suffix',
-        'mp4,rmvb,mkv,avi,wmv,mov,mpg,3gp,mp3,wma,ape,flac,wav,ogg,m4a,gif,jpeg,jpg,bmp,png,ico,tga,txt,pdf,doc,docx,ppt,pptx,xls,xlsx,csv,psd,rar,7z,zip,iso,cso');
+INSERT INTO `users` (`token`, `status`)
+VALUES ('hunzsig', 1);
